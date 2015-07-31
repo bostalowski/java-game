@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.mygdx.character.Tengu;
 import com.sun.javafx.scene.traversal.Direction;
 
 import java.awt.geom.Point2D;
@@ -30,8 +31,12 @@ public class CharacterRunAnimation implements ApplicationListener
 
     private float temps;
 
-    private Point2D position;
-    private Direction direction;
+    private Tengu tengu;
+
+    public CharacterRunAnimation(Tengu tengu)
+    {
+        this.tengu = tengu;
+    }
 
     @Override
     public void create()
@@ -66,14 +71,8 @@ public class CharacterRunAnimation implements ApplicationListener
         actualFrame = animation.getKeyFrame(temps, true);
         actualFrame.setRegion(actualFrame, 0, 0, frameWidth, frameHeight);
 
-        if(direction == Direction.LEFT) {
-            if(!actualFrame.isFlipX()) {
-                actualFrame.flip(true, false);
-            }
-        }
-
         spriteBatch.begin();
-        spriteBatch.draw(actualFrame, (float) position.getX(), (float) position.getY());
+        spriteBatch.draw(actualFrame, tengu.getPosition().x, tengu.getPosition().y, frameWidth/2, frameHeight/2, frameWidth, frameHeight, tengu.getDirection().x, 1, 0/*, actualFrame.getRegionX(), actualFrame.getRegionY(), actualFrame.getRegionWidth(), actualFrame.getRegionHeight(), false, false*/);
         spriteBatch.end();
     }
 
@@ -86,13 +85,8 @@ public class CharacterRunAnimation implements ApplicationListener
     @Override
     public void dispose() {}
 
-    public void setPosition(Point2D position)
+    public void reset()
     {
-        this.position = position;
-    }
-
-    public void setDirection(Direction direction)
-    {
-        this.direction = direction;
+        temps = 0f;
     }
 }

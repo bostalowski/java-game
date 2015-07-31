@@ -3,6 +3,7 @@ package com.mygdx.character;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.math.Vector2;
 import com.mygdx.character.animations.CharacterJumpAnimation;
 import com.mygdx.character.animations.CharacterRunAnimation;
 import com.mygdx.character.animations.CharacterStanceAnimation;
@@ -16,26 +17,34 @@ public class Tengu implements ApplicationListener
     public static final int ACTION_JUMP = 1;
     public static final int ACTION_RUN = 2;
 
-    private float positionX;
-    private float positionY;
-    private float speed;
+    public static final int RUN_SPEED = 200;
+    public static final int JUMP_SPEED = 200;
+
     private int currentAction;
-    private Direction direction;
+
+
+    private Vector2 position;
+    private Vector2 speed;
+    private Vector2 direction;
+    private Vector2 lastDirection;
 
     private CharacterStanceAnimation characterStanceAnimation;
     private CharacterJumpAnimation characterJumpAnimation;
     private CharacterRunAnimation characterRunAnimation;
 
+    boolean isJumping = false;
+
     public Tengu()
     {
-        this.positionX = 0;
-        this.positionY = 0;
-        this.speed = 200f;
         this.currentAction = ACTION_STANCE;
-        this.direction = Direction.RIGHT;
+        this.position = Vector2.Zero;
+        this.speed = Vector2.Zero;
+        this.direction = new Vector2(1,0);
+        this.lastDirection = direction;
 
-        characterStanceAnimation = new CharacterStanceAnimation();
-        characterRunAnimation = new CharacterRunAnimation();
+        characterStanceAnimation = new CharacterStanceAnimation(this);
+        characterRunAnimation = new CharacterRunAnimation(this);
+        characterJumpAnimation = new CharacterJumpAnimation(this);
     }
 
     @Override
@@ -43,6 +52,7 @@ public class Tengu implements ApplicationListener
     {
         characterStanceAnimation.create();
         characterRunAnimation.create();
+        characterJumpAnimation.create();
     }
 
     @Override
@@ -51,15 +61,17 @@ public class Tengu implements ApplicationListener
     @Override
     public void render()
     {
+        if(isJumping && characterJumpAnimation.isAnimationFinished()) {
+            isJumping = false;
+        }
         this.handleKeyboard();
 
         if(currentAction == ACTION_STANCE) {
-            characterStanceAnimation.setPosition(new Point2D.Float(positionX, positionY));
             characterStanceAnimation.render();
         } else if(currentAction == ACTION_RUN) {
-            characterRunAnimation.setPosition(new Point2D.Float(positionX, positionY));
-            characterRunAnimation.setDirection(direction);
             characterRunAnimation.render();
+        } else if(currentAction == ACTION_JUMP) {
+            characterJumpAnimation.render();
         }
     }
 
@@ -74,35 +86,64 @@ public class Tengu implements ApplicationListener
 
     public void handleKeyboard()
     {
+        speed = Vector2.Zero;
+        lastDirection = direction;
+
         boolean noKeyPressed = true;
         if(Gdx.input.isKeyPressed(Input.Keys.UP))
         {
-            currentAction = ACTION_JUMP;
-            noKeyPressed = false;
+            //currentAction = ACTION_JUMP;
+            //noKeyPressed = false;
         }
         if(Gdx.input.isKeyPressed(Input.Keys.DOWN))
         {
-            currentAction = ACTION_STANCE;
-            noKeyPressed = false;
+            //currentAction = ACTION_STANCE;
+            //noKeyPressed = false;
         }
         if(Gdx.input.isKeyPressed(Input.Keys.RIGHT) )
         {
-            currentAction = ACTION_RUN;
-            positionX = positionX + (Gdx.graphics.getDeltaTime() * speed);
-            direction = Direction.RIGHT;
+            if(!isJumping)
+            {
+                currentAction = ACTION_RUN;
+            }
+            direction = new Vector2(1, direction.y);
+            speed = new Vector2(RUN_SPEED, 0);
+            position = new Vector2(position.x + (direction.x * speed.x) * Gdx.graphics.getDeltaTime(), position.y + (direction.y * speed.y) * Gdx.graphics.getDeltaTime());
             noKeyPressed = false;
         }
         if(Gdx.input.isKeyPressed(Input.Keys.LEFT) )
         {
-            currentAction = ACTION_RUN;
-            positionX = positionX - (Gdx.graphics.getDeltaTime() * speed);
-            direction = Direction.LEFT;
+            if(!isJumping)
+            {
+                currentAction = ACTION_RUN;
+            }
+            direction = new Vector2(-1, direction.y);
+            speed = new Vector2(RUN_SPEED, 0);
+            position = new Vector2(position.x + (direction.x * speed.x) * Gdx.graphics.getDeltaTime(), position.y + (direction.y * speed.y) * Gdx.graphics.getDeltaTime());
             noKeyPressed = false;
         }
 
-        if(noKeyPressed)
+        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !isJumping)
+        {
+            isJumping = true;
+            currentAction = ACTION_JUMP;
+            speed = new Vector2(RUN_SPEED, JUMP_SPEED);
+            characterJumpAnimation.start();
+        }
+
+        if(noKeyPressed && !isJumping)
         {
             currentAction = ACTION_STANCE;
         }
+    }
+
+    public Vector2 getPosition()
+    {
+        return position;
+    }
+
+    public Vector2 getDirection()
+    {
+        return direction;
     }
 }

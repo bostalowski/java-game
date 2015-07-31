@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.mygdx.character.Tengu;
 
 import java.awt.geom.Point2D;
 
@@ -19,7 +20,7 @@ public class CharacterJumpAnimation implements ApplicationListener
     private int frameWidth = 175;
     private int frameHeight = 175;
 
-    private float animationSpeed = 0.7f;
+    private float animationSpeed = 0.5f;
 
     private SpriteBatch spriteBatch;
     private Texture texture;
@@ -29,7 +30,12 @@ public class CharacterJumpAnimation implements ApplicationListener
 
     private float temps;
 
-    private Point2D position;
+    private Tengu tengu;
+
+    public CharacterJumpAnimation(Tengu tengu)
+    {
+        this.tengu = tengu;
+    }
 
     @Override
     public void create()
@@ -61,10 +67,10 @@ public class CharacterJumpAnimation implements ApplicationListener
     public void render()
     {
         temps += Gdx.graphics.getDeltaTime();
-        actualFrame = animation.getKeyFrame(temps, true);
+        actualFrame = animation.getKeyFrame(temps, false);
         actualFrame.setRegion(actualFrame, 0, 0, frameWidth, frameHeight);
         spriteBatch.begin();
-        spriteBatch.draw(actualFrame, (float) position.getX(), (float) position.getY());
+        spriteBatch.draw(actualFrame, tengu.getPosition().x, tengu.getPosition().y, frameWidth/2, frameHeight/2, frameWidth, frameHeight, tengu.getDirection().x, 1, 0/*, actualFrame.getRegionX(), actualFrame.getRegionY(), actualFrame.getRegionWidth(), actualFrame.getRegionHeight(), false, false*/);
         spriteBatch.end();
     }
 
@@ -77,13 +83,13 @@ public class CharacterJumpAnimation implements ApplicationListener
     @Override
     public void dispose() {}
 
-    public void setPosition(Point2D position)
+    public boolean isAnimationFinished()
     {
-        this.position = position;
+        return animation.isAnimationFinished(temps);
     }
 
-    public Point2D getPosition()
+    public void start()
     {
-        return this.position;
+        temps = 0f;
     }
 }

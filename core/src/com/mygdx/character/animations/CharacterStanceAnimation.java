@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.mygdx.character.Tengu;
 
 import java.awt.geom.Point2D;
 
@@ -29,7 +30,12 @@ public class CharacterStanceAnimation implements ApplicationListener
 
     private float temps;
 
-    private Point2D position;
+    private Tengu tengu;
+
+    public CharacterStanceAnimation(Tengu tengu)
+    {
+        this.tengu = tengu;
+    }
 
     @Override
     public void create()
@@ -63,8 +69,9 @@ public class CharacterStanceAnimation implements ApplicationListener
         temps += Gdx.graphics.getDeltaTime();
         actualFrame = animation.getKeyFrame(temps, true);
         actualFrame.setRegion(actualFrame, 0, 0, frameWidth, frameHeight);
+
         spriteBatch.begin();
-        spriteBatch.draw(actualFrame, (float) position.getX(), (float) position.getY());
+        spriteBatch.draw(actualFrame, tengu.getPosition().x, tengu.getPosition().y, frameWidth/2, frameHeight/2, frameWidth, frameHeight, tengu.getDirection().x, 1, 0/*, actualFrame.getRegionX(), actualFrame.getRegionY(), actualFrame.getRegionWidth(), actualFrame.getRegionHeight(), false, false*/);
         spriteBatch.end();
     }
 
@@ -77,13 +84,8 @@ public class CharacterStanceAnimation implements ApplicationListener
     @Override
     public void dispose() {}
 
-    public void setPosition(Point2D position)
+    public void reset()
     {
-        this.position = position;
-    }
-
-    public Point2D getPosition()
-    {
-        return this.position;
+        temps = 0;
     }
 }
