@@ -8,71 +8,33 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.mygdx.character.Tengu;
 
-import java.awt.geom.Point2D;
-
-public class CharacterStanceAnimation implements ApplicationListener
+public class CharacterStanceAnimation extends CharacterAnimation implements ApplicationListener
 {
     private static final int FRAME_COLS = 6;
     private static final int FRAME_ROWS = 1;
-
     private static final String SPRITE_FILENAME = "spritesheet_tengu_stance.png";
-
-    private int frameWidth = 175;
-    private int frameHeight = 175;
-
-    private float animationSpeed = 0.7f;
-
-    private SpriteBatch spriteBatch;
-    private Texture texture;
-    private Animation animation;
-    private TextureRegion actualFrame;
-    private TextureRegion frames[];
-
-    private float temps;
-
-    private Tengu tengu;
 
     public CharacterStanceAnimation(Tengu tengu)
     {
-        this.tengu = tengu;
+        super(175, 175, 0.7f, tengu);
     }
 
     @Override
     public void create()
     {
-        // Initialisation
-        spriteBatch = new SpriteBatch();
-        texture = new Texture(Gdx.files.internal(SPRITE_FILENAME));
-
-        //map sprites into one dimensional array
-        TextureRegion[][] tmp = TextureRegion.split(texture, texture.getWidth()/FRAME_COLS, texture.getHeight()/FRAME_ROWS);
-        frames = new TextureRegion[FRAME_COLS * FRAME_ROWS];
-        int index = 0;
-
-        for (int i = 0; i < FRAME_ROWS; i++) {
-            for (int j = 0; j < FRAME_COLS; j++) {
-                frames[index++] = tmp[i][j];
-            }
-        }
-
-        //set animation speed
-        animation = new Animation(animationSpeed/(FRAME_COLS * FRAME_ROWS), frames);
-        temps = 0.0f;
+        super.create(SPRITE_FILENAME, FRAME_COLS, FRAME_ROWS);
     }
 
     @Override
     public void resize(int width, int height) {}
 
     @Override
+    public void update() {}
+
+    @Override
     public void render()
     {
-        temps += Gdx.graphics.getDeltaTime();
-        actualFrame = animation.getKeyFrame(temps, true);
-        actualFrame.setRegion(actualFrame, 0, 0, frameWidth, frameHeight);
-
-        spriteBatch.begin();
-        spriteBatch.draw(actualFrame, tengu.getPosition().x, tengu.getPosition().y, frameWidth/2, frameHeight/2, frameWidth, frameHeight, tengu.getDirection().x, 1, 0/*, actualFrame.getRegionX(), actualFrame.getRegionY(), actualFrame.getRegionWidth(), actualFrame.getRegionHeight(), false, false*/);
-        spriteBatch.end();
+        super.render(true);
     }
 
     @Override
@@ -84,8 +46,14 @@ public class CharacterStanceAnimation implements ApplicationListener
     @Override
     public void dispose() {}
 
+    @Override
     public void reset()
     {
-        temps = 0;
+        elapsedTime = 0;
+    }
+
+    @Override
+    public boolean isAnimationFinished() {
+        return false;
     }
 }

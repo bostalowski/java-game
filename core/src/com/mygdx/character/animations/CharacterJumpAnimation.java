@@ -1,77 +1,44 @@
 package com.mygdx.character.animations;
 
 import com.badlogic.gdx.ApplicationListener;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
 import com.mygdx.character.Tengu;
 
-import java.awt.geom.Point2D;
-
-public class CharacterJumpAnimation implements ApplicationListener
+public class CharacterJumpAnimation extends CharacterAnimation implements ApplicationListener
 {
     private static final int FRAME_COLS = 4;
     private static final int FRAME_ROWS = 1;
-
     private static final String SPRITE_FILENAME = "spritesheet_tengu_jump.png";
-
-    private int frameWidth = 175;
-    private int frameHeight = 175;
-
-    private float animationSpeed = 0.5f;
-
-    private SpriteBatch spriteBatch;
-    private Texture texture;
-    private Animation animation;
-    private TextureRegion actualFrame;
-    private TextureRegion frames[];
-
-    private float temps;
-
-    private Tengu tengu;
 
     public CharacterJumpAnimation(Tengu tengu)
     {
-        this.tengu = tengu;
+        super(175, 175, 0.5f, tengu);
     }
 
     @Override
     public void create()
     {
-        // Initialisation
-        spriteBatch = new SpriteBatch();
-        texture = new Texture(Gdx.files.internal(SPRITE_FILENAME));
-
-        //map sprites into one dimensional array
-        TextureRegion[][] tmp = TextureRegion.split(texture, texture.getWidth()/FRAME_COLS, texture.getHeight()/FRAME_ROWS);
-        frames = new TextureRegion[FRAME_COLS * FRAME_ROWS];
-        int index = 0;
-
-        for (int i = 0; i < FRAME_ROWS; i++) {
-            for (int j = 0; j < FRAME_COLS; j++) {
-                frames[index++] = tmp[i][j];
-            }
-        }
-
-        //set animation speed
-        animation = new Animation(animationSpeed/(FRAME_COLS * FRAME_ROWS), frames);
-        temps = 0.0f;
+        super.create(SPRITE_FILENAME, FRAME_COLS, FRAME_ROWS);
     }
 
     @Override
     public void resize(int width, int height) {}
 
+    public void update()
+    {
+        if(elapsedTime < animationSpeed/2)
+        {
+            tengu.setDirection(new Vector2(tengu.getDirection().x, 1));
+        } else {
+            tengu.setDirection(new Vector2(tengu.getDirection().x, -1));
+        }
+    }
+
     @Override
     public void render()
     {
-        temps += Gdx.graphics.getDeltaTime();
-        actualFrame = animation.getKeyFrame(temps, false);
-        actualFrame.setRegion(actualFrame, 0, 0, frameWidth, frameHeight);
-        spriteBatch.begin();
-        spriteBatch.draw(actualFrame, tengu.getPosition().x, tengu.getPosition().y, frameWidth/2, frameHeight/2, frameWidth, frameHeight, tengu.getDirection().x, 1, 0/*, actualFrame.getRegionX(), actualFrame.getRegionY(), actualFrame.getRegionWidth(), actualFrame.getRegionHeight(), false, false*/);
-        spriteBatch.end();
+        //System.out.println(tengu.getPosition().y);
+        super.render(false);
     }
 
     @Override
@@ -83,13 +50,21 @@ public class CharacterJumpAnimation implements ApplicationListener
     @Override
     public void dispose() {}
 
+    @Override
     public boolean isAnimationFinished()
     {
-        return animation.isAnimationFinished(temps);
+        return animation.isAnimationFinished(elapsedTime);
+    }
+
+    @Override
+    public void reset()
+    {
+        elapsedTime = 0f;
+        tengu.setDirection(new Vector2(tengu.getDirection().x, 0));
     }
 
     public void start()
     {
-        temps = 0f;
+        elapsedTime = 0f;
     }
 }
