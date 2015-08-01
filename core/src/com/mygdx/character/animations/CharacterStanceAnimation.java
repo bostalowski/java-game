@@ -1,11 +1,6 @@
 package com.mygdx.character.animations;
 
 import com.badlogic.gdx.ApplicationListener;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.mygdx.character.Tengu;
 
 public class CharacterStanceAnimation extends CharacterAnimation implements ApplicationListener
@@ -29,12 +24,15 @@ public class CharacterStanceAnimation extends CharacterAnimation implements Appl
     public void resize(int width, int height) {}
 
     @Override
-    public void update() {}
+    public void update()
+    {
+        super.update(true);
+    }
 
     @Override
     public void render()
     {
-        super.render(true);
+        super.render();
     }
 
     @Override

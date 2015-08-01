@@ -17,16 +17,17 @@ public class Tengu implements ApplicationListener
     public static final int ACTION_STANCE = 0;
     public static final int ACTION_JUMP = 1;
     public static final int ACTION_RUN = 2;
+    public static final int ACTION_FALL = 3;
 
     public static final int RUN_SPEED = 200;
     public static final int JUMP_SPEED = 200;
+    public static final int FALL_SPEED = 200;
 
     private int currentAction;
 
     private Vector2 position;
     private Vector2 speed;
     private Vector2 direction;
-    private Vector2 lastDirection;
 
     private CharacterAnimation currentAnimation;
     private CharacterStanceAnimation characterStanceAnimation;
@@ -34,15 +35,16 @@ public class Tengu implements ApplicationListener
     private CharacterRunAnimation characterRunAnimation;
 
     boolean isOnBlockedAnimation = false;
+    boolean isJumping = false;
+    boolean isFalling = false;
     boolean isOnAir = false;
 
     public Tengu()
     {
         this.currentAction = ACTION_STANCE;
-        this.position = Vector2.Zero;
+        this.position = new Vector2(0, 0);//Vector2.Zero;
         this.speed = Vector2.Zero;
         this.direction = new Vector2(1,0);
-        this.lastDirection = direction;
 
         characterStanceAnimation = new CharacterStanceAnimation(this);
         characterRunAnimation = new CharacterRunAnimation(this);
@@ -64,12 +66,22 @@ public class Tengu implements ApplicationListener
 
     public void update()
     {
-        if(position.y > 0) {
-            isOnAir = true;
-        }
+        isOnAir = position.y > 0;
 
         if(isOnBlockedAnimation && currentAnimation.isAnimationFinished()) {
-            isOnBlockedAnimation = false;
+            if(isJumping)
+            {
+                isJumping = false;
+                if(isOnAir) {
+                    changeAnimation(ACTION_FALL);
+                }
+            }
+
+            if(isFalling && position.y <= 0)
+            {
+                isFalling = false;
+                changeAnimation(ACTION_STANCE);
+            }
         }
 
         this.handleKeyboard();
@@ -83,7 +95,12 @@ public class Tengu implements ApplicationListener
     {
         update();
 
-        currentAnimation.render();
+        if(isOnAir && isFalling) {
+            currentAnimation.renderFrame(3);
+        } else {
+            currentAnimation.render();
+        }
+
     }
 
     @Override
@@ -97,8 +114,6 @@ public class Tengu implements ApplicationListener
 
     public void handleKeyboard()
     {
-        lastDirection = direction;
-
         boolean noKeyPressed = true;
         if(Gdx.input.isKeyPressed(Input.Keys.UP))
         {
@@ -117,7 +132,6 @@ public class Tengu implements ApplicationListener
                 changeAnimation(ACTION_RUN);
             }
             direction = new Vector2(1, direction.y);
-            speed = new Vector2(RUN_SPEED, speed.y);
             noKeyPressed = false;
         }
         if(Gdx.input.isKeyPressed(Input.Keys.LEFT) )
@@ -127,15 +141,12 @@ public class Tengu implements ApplicationListener
                 changeAnimation(ACTION_RUN);
             }
             direction = new Vector2(-1, direction.y);
-            speed = new Vector2(RUN_SPEED, speed.y);
             noKeyPressed = false;
         }
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !isOnBlockedAnimation)
         {
-            isOnBlockedAnimation = true;
             changeAnimation(ACTION_JUMP);
-            speed = new Vector2(speed.x, JUMP_SPEED);
             characterJumpAnimation.start();
         }
 
@@ -176,23 +187,35 @@ public class Tengu implements ApplicationListener
     {
         if(animation != currentAction)
         {
-            //System.out.println(position.y);
             currentAnimation.reset();
         }
 
         if(animation == ACTION_STANCE)
         {
+            isOnBlockedAnimation = false;
             currentAction = ACTION_STANCE;
             currentAnimation = characterStanceAnimation;
             speed = Vector2.Zero;
         } else if (animation == ACTION_RUN)
         {
+            isOnBlockedAnimation = false;
             currentAction = ACTION_RUN;
             currentAnimation = characterRunAnimation;
+            speed = new Vector2(RUN_SPEED, speed.y);
         } else if (animation == ACTION_JUMP)
         {
+            isOnBlockedAnimation = true;
             currentAction = ACTION_JUMP;
             currentAnimation = characterJumpAnimation;
+            isJumping = true;
+            speed = new Vector2(speed.x, JUMP_SPEED);
+        } else if (animation == ACTION_FALL)
+        {
+            isOnBlockedAnimation = true;
+            currentAction = ACTION_FALL;
+            currentAnimation = characterJumpAnimation;
+            isFalling = true;
+            speed = new Vector2(speed.x, -FALL_SPEED);
         }
     }
 }

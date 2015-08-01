@@ -26,19 +26,14 @@ public class CharacterJumpAnimation extends CharacterAnimation implements Applic
 
     public void update()
     {
-        if(elapsedTime < animationSpeed/2)
-        {
-            tengu.setDirection(new Vector2(tengu.getDirection().x, 1));
-        } else {
-            tengu.setDirection(new Vector2(tengu.getDirection().x, -1));
-        }
+        super.update(false);
+        tengu.setDirection(new Vector2(tengu.getDirection().x, 1));
     }
 
     @Override
     public void render()
     {
-        //System.out.println(tengu.getPosition().y);
-        super.render(false);
+        super.render();
     }
 
     @Override

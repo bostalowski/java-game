@@ -25,12 +25,15 @@ public class CharacterRunAnimation extends CharacterAnimation implements Applica
     public void resize(int width, int height) {}
 
     @Override
-    public void update(){}
+    public void update()
+    {
+        super.update(true);
+    }
 
     @Override
     public void render()
     {
-        super.render(true);
+        super.render();
     }
 
     @Override

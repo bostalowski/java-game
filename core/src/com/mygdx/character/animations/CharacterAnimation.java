@@ -54,12 +54,27 @@ public abstract class CharacterAnimation
         elapsedTime = 0.0f;
     }
 
-    public abstract void render();
+    public abstract void update();
 
-    public void render(boolean loop)
+    public void update(boolean loop)
     {
         elapsedTime += Gdx.graphics.getDeltaTime();
+
         actualFrame = animation.getKeyFrame(elapsedTime, loop);
+        actualFrame.setRegion(actualFrame, 0, 0, frameWidth, frameHeight);
+    }
+
+    public void render()
+    {
+        spriteBatch.begin();
+        spriteBatch.draw(actualFrame, tengu.getPosition().x, tengu.getPosition().y, frameWidth/2, frameHeight/2, frameWidth, frameHeight, tengu.getDirection().x, 1, 0/*, actualFrame.getRegionX(), actualFrame.getRegionY(), actualFrame.getRegionWidth(), actualFrame.getRegionHeight(), false, false*/);
+        spriteBatch.end();
+    }
+
+    public void renderFrame(int frameIndex)
+    {
+        TextureRegion[] tmp = animation.getKeyFrames();
+        actualFrame = tmp[frameIndex];
         actualFrame.setRegion(actualFrame, 0, 0, frameWidth, frameHeight);
 
         spriteBatch.begin();
@@ -67,7 +82,6 @@ public abstract class CharacterAnimation
         spriteBatch.end();
     }
 
-    public abstract void update();
     public abstract boolean isAnimationFinished();
     public abstract void reset();
 }
