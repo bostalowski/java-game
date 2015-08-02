@@ -6,19 +6,20 @@ import com.mygdx.character.Tengu;
 
 public class CharacterRunAnimation extends CharacterAnimation implements ApplicationListener
 {
-    private static final int FRAME_COLS = 6;
-    private static final int FRAME_ROWS = 1;
-    private static final String SPRITE_FILENAME = "spritesheet_tengu_run.png";
+    public static final int FRAME_COLS = 6;
+    public static final int FRAME_ROWS = 1;
+    public static final String SPRITE_FILENAME = "spritesheet_tengu_run.png";
+    public static final float ANIMATION_DURATION = 0.7f;
 
     public CharacterRunAnimation(Tengu tengu)
     {
-        super(175, 175, 0.7f, tengu);
+        super(175, 175, tengu);
     }
 
     @Override
     public void create()
     {
-        super.create(SPRITE_FILENAME, FRAME_COLS, FRAME_ROWS);
+        super.create(SPRITE_FILENAME, FRAME_COLS, FRAME_ROWS, ANIMATION_DURATION);
     }
 
     @Override

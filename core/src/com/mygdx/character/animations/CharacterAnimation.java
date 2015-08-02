@@ -12,8 +12,6 @@ public abstract class CharacterAnimation
     protected int frameWidth = 0;
     protected int frameHeight = 0;
 
-    protected float animationSpeed = 0f;
-
     protected SpriteBatch spriteBatch;
     protected Texture texture;
     protected Animation animation;
@@ -24,15 +22,14 @@ public abstract class CharacterAnimation
 
     protected Tengu tengu;
 
-    public CharacterAnimation(int frameWidth, int frameHeight, float animationSpeed, Tengu tengu)
+    public CharacterAnimation(int frameWidth, int frameHeight, Tengu tengu)
     {
         this.frameWidth = frameWidth;
         this.frameHeight = frameHeight;
-        this.animationSpeed = animationSpeed;
         this.tengu = tengu;
     }
 
-    public void create(String fileName, int frameCols, int frameRows)
+    public void create(String fileName, int frameCols, int frameRows, float animationDuration)
     {
         // Initialisation
         spriteBatch = new SpriteBatch();
@@ -50,7 +47,7 @@ public abstract class CharacterAnimation
         }
 
         //set animation speed
-        animation = new Animation(animationSpeed/(frameCols * frameRows), frames);
+        animation = new Animation(animationDuration/(frameCols * frameRows), frames);
         elapsedTime = 0.0f;
     }
 
@@ -84,4 +81,9 @@ public abstract class CharacterAnimation
 
     public abstract boolean isAnimationFinished();
     public abstract void reset();
+
+    public float getElapsedTime()
+    {
+        return elapsedTime;
+    }
 }
