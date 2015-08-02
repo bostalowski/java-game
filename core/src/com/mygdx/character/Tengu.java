@@ -63,6 +63,9 @@ public class Tengu implements ApplicationListener
 
     public void update()
     {
+        handleKeyboard();
+        currentAnimation.update();
+
         if(isOnBlockedAnimation && currentAnimation.isAnimationFinished()) {
             isOnBlockedAnimation = false;
         }
@@ -82,9 +85,6 @@ public class Tengu implements ApplicationListener
             speed = new Vector2(speed.x, FALL_SPEED);
             direction = new Vector2(direction.x, -1);
         }
-
-        this.handleKeyboard();
-        currentAnimation.update();
 
         Vector2 newPosition = new Vector2(position.x + (direction.x * speed.x) * Gdx.graphics.getDeltaTime(), position.y + (direction.y * speed.y) * Gdx.graphics.getDeltaTime());
         if(newPosition.y < 0) {
