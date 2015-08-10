@@ -4,6 +4,7 @@ import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.character.animations.CharacterAnimation;
 import com.mygdx.character.animations.CharacterJumpAnimation;
 import com.mygdx.character.animations.CharacterRunAnimation;
@@ -29,6 +30,8 @@ public class Tengu implements ApplicationListener
     private Vector2 speed;
     private Vector2 direction;
 
+    private Body body;
+
     private CharacterAnimation currentAnimation;
     private CharacterStanceAnimation characterStanceAnimation;
     private CharacterJumpAnimation characterJumpAnimation;
@@ -39,7 +42,7 @@ public class Tengu implements ApplicationListener
     public Tengu()
     {
         this.currentAction = ACTION_STANCE;
-        this.position = Vector2.Zero;
+        this.position = new Vector2(0,0);
         this.speed = Vector2.Zero;
         this.direction = new Vector2(1,0);
 
@@ -63,10 +66,11 @@ public class Tengu implements ApplicationListener
 
     public void update()
     {
-        handleKeyboard();
+        position = body.getPosition();
+        //handleKeyboard();
         currentAnimation.update();
 
-        if(isOnBlockedAnimation && currentAnimation.isAnimationFinished()) {
+        /*if(isOnBlockedAnimation && currentAnimation.isAnimationFinished()) {
             isOnBlockedAnimation = false;
         }
 
@@ -92,19 +96,13 @@ public class Tengu implements ApplicationListener
             changeAnimation(ACTION_STANCE);
         }
 
-        position = newPosition;
+        position = newPosition;*/
     }
 
     @Override
     public void render()
     {
-        update();
-
-        if(currentAction == ACTION_FALL) {
-            currentAnimation.renderFrame(3);
-        } else {
-            currentAnimation.render();
-        }
+        currentAnimation.render();
     }
 
     @Override
@@ -207,5 +205,29 @@ public class Tengu implements ApplicationListener
     {
         this.direction = direction;
         return this;
+    }
+
+    public void createBody(World world)
+    {
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        // Set our body to the same position as our sprite
+        bodyDef.position.set(position.x, position.y);
+
+        // Create a body in the world using our definition
+        body = world.createBody(bodyDef);
+
+        // Now define the dimensions of the physics shape
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(175f, 175f);
+
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = shape;
+        fixtureDef.density = 1f;
+
+        body.createFixture(fixtureDef);
+
+        // Shape is the only disposable of the lot, so get rid of it
+        shape.dispose();
     }
 }
