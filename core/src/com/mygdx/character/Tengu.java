@@ -101,7 +101,7 @@ public class Tengu implements ApplicationListener
         update();
 
         if(currentAction == ACTION_FALL) {
-            currentAnimation.renderFrame(3);
+            currentAnimation.renderFrame(8);
         } else {
             currentAnimation.render();
         }

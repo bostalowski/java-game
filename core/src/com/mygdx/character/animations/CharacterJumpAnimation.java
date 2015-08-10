@@ -6,7 +6,7 @@ import com.mygdx.character.Tengu;
 
 public class CharacterJumpAnimation extends CharacterAnimation implements ApplicationListener
 {
-    public static final int FRAME_COLS = 4;
+    public static final int FRAME_COLS = 9;
     public static final int FRAME_ROWS = 1;
     public static final String SPRITE_FILENAME = "spritesheet_tengu_jump.png";
     public static final float ANIMATION_DURATION = 0.5f;
