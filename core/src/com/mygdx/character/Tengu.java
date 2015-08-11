@@ -14,16 +14,17 @@ import com.sun.javafx.scene.traversal.Direction;
 
 import java.awt.geom.Point2D;
 
-public class Tengu extends ApplicationAdapter implements InputProcessor
+public class Tengu extends ApplicationAdapter
 {
     public static final int ACTION_STANCE = 0;
     public static final int ACTION_JUMP = 1;
     public static final int ACTION_RUN = 2;
     public static final int ACTION_FALL = 3;
 
-    public static final float SPEED_RUN = 400f;
-    public static final float SPEED_JUMP = 2f;
+    public static final float SPEED_RUN = 5f;
+    public static final float SPEED_JUMP = 15f;
     public static final float SPEED_FALL = 400;
+    public static final float MAX_VELOCITY = 7f;
 
     private int currentAction;
 
@@ -60,43 +61,13 @@ public class Tengu extends ApplicationAdapter implements InputProcessor
         characterRunAnimation.create();
         characterJumpAnimation.create();
         createBody(world);
-
-        Gdx.input.setInputProcessor(this);
     }
 
     public void update()
     {
-        //handleKeyboard();
+        handleKeyboard();
         position = new Vector2(MyGdxGame.MetersToPixels(body.getPosition().x) - (getWidth()/2), MyGdxGame.MetersToPixels(body.getPosition().y) - (getHeight()/2));
         currentAnimation.update();
-
-        /*if(isOnBlockedAnimation && currentAnimation.isAnimationFinished()) {
-            isOnBlockedAnimation = false;
-        }
-
-        //decrease jump speed
-        if(currentAction == ACTION_JUMP) {
-            float decreaseSpeed = (JUMP_SPEED / (CharacterJumpAnimation.ANIMATION_DURATION * 100)) * (currentAnimation.getElapsedTime() * 100);
-            if(JUMP_SPEED - decreaseSpeed < 0) {
-                decreaseSpeed = JUMP_SPEED;
-            }
-            speed = new Vector2(speed.x, JUMP_SPEED - decreaseSpeed);
-        }
-
-        //if on air and falling
-        if(position.y > 0 && currentAction != ACTION_JUMP) {
-            changeAnimation(ACTION_FALL);
-            speed = new Vector2(speed.x, FALL_SPEED);
-            direction = new Vector2(direction.x, -1);
-        }
-
-        Vector2 newPosition = new Vector2(position.x + (direction.x * speed.x) * Gdx.graphics.getDeltaTime(), position.y + (direction.y * speed.y) * Gdx.graphics.getDeltaTime());
-        if(newPosition.y < 0) {
-            newPosition.y = 0;
-            changeAnimation(ACTION_STANCE);
-        }
-
-        position = newPosition;*/
     }
 
     public void render()
@@ -109,53 +80,45 @@ public class Tengu extends ApplicationAdapter implements InputProcessor
     public void handleKeyboard()
     {
         boolean noKeyPressed = true;
+        Vector2 vel = body.getLinearVelocity();
+        Vector2 pos = body.getPosition();
+
+        // cap max velocity on x
+        if(Math.abs(vel.x) > SPEED_RUN) {
+            vel.x = Math.signum(vel.x) * SPEED_RUN;
+            body.setLinearVelocity(vel.x, vel.y);
+        }
+
         if(Gdx.input.isKeyPressed(Input.Keys.UP))
         {
         }
         if(Gdx.input.isKeyPressed(Input.Keys.DOWN))
         {
         }
-        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT) )
+        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT) && vel.x < SPEED_RUN )
         {
-            if(!isOnBlockedAnimation)
-            {
-                changeAnimation(ACTION_RUN);
-            }
-
-            Vector2 force = new Vector2(SPEED_RUN, 0);
-            Vector2 point = body.getWorldPoint(body.getWorldCenter());
-            //body.applyForce(force ,point, true);
-            body.applyLinearImpulse(force, point, true);
-            //body.applyForceToCenter(force, true);
-
-            //speed = new Vector2(RUN_SPEED, speed.y);
+            body.applyLinearImpulse(SPEED_RUN, 0, pos.x, pos.y, true);
             direction = new Vector2(1, direction.y);
+            changeAnimation(ACTION_RUN);
             noKeyPressed = false;
         }
-        if(Gdx.input.isKeyPressed(Input.Keys.LEFT) )
+        if(Gdx.input.isKeyPressed(Input.Keys.LEFT) && vel.x > -SPEED_RUN )
         {
-            if(!isOnBlockedAnimation)
-            {
-                changeAnimation(ACTION_RUN);
-            }
-            speed = new Vector2(SPEED_RUN, speed.y);
+            body.applyLinearImpulse(-SPEED_RUN, 0, pos.x, pos.y, true);
             direction = new Vector2(-1, direction.y);
+            changeAnimation(ACTION_RUN);
             noKeyPressed = false;
         }
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !isOnBlockedAnimation)
+        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE))
         {
-            changeAnimation(ACTION_JUMP);
-            speed = new Vector2(speed.x, SPEED_JUMP);
-            direction = new Vector2(direction.x, 1);
-            characterJumpAnimation.start();
+            body.setLinearVelocity(vel.x, 0);
+            body.setTransform(pos.x, pos.y + 0.01f, 0);
+            body.applyLinearImpulse(0, SPEED_JUMP, pos.x, pos.y, true);
+            noKeyPressed = false;
         }
 
-        if(noKeyPressed && !isOnBlockedAnimation)
-        {
-            if(currentAction != ACTION_FALL) {
-                speed = Vector2.Zero;
-            }
+        if(noKeyPressed && vel.x == 0 && vel.y == 0) {
             changeAnimation(ACTION_STANCE);
         }
     }
@@ -223,6 +186,7 @@ public class Tengu extends ApplicationAdapter implements InputProcessor
         fixtureDef.shape = shape;
         fixtureDef.density = 1f;
         fixtureDef.restitution = 0f;
+        fixtureDef.friction = 2f;
 
         body.createFixture(fixtureDef);
         shape.dispose();
@@ -241,82 +205,5 @@ public class Tengu extends ApplicationAdapter implements InputProcessor
     private float getHeight()
     {
         return currentAnimation.getHeight();
-    }
-
-    @Override
-    public boolean keyDown(int keycode) {
-        if(keycode == Input.Keys.RIGHT) {
-            System.out.println("RIGHT DOWN");
-            //body.applyLinearImpulse(force, point, true);
-            body.applyForceToCenter(SPEED_RUN, 0, true);
-            //body.setLinearVelocity(SPEED_RUN, 0f);
-            direction = new Vector2(1, direction.y);
-            changeAnimation(ACTION_RUN);
-        }
-
-        if(keycode == Input.Keys.LEFT) {
-            System.out.println("LEFT DOWN");
-            body.applyForceToCenter(-SPEED_RUN, 0, true);
-            direction = new Vector2(-1, direction.y);
-            changeAnimation(ACTION_RUN);
-        }
-
-        if(keycode == Input.Keys.UP) {
-            //body.applyLinearImpulse(0, SPEED_JUMP, 175f/2f / 100f, 175f/2f / 100f, true);
-            //body.applyForceToCenter(0f, SPEED_JUMP, true);
-            
-            Vector2 force  = new Vector2(0, SPEED_JUMP);
-            float x = MyGdxGame.PixelsToMeters(getWidth() / 2);
-            body.applyLinearImpulse(force.x, force.y, x, 0, true);
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean keyUp(int keycode) {
-        if(keycode == Input.Keys.RIGHT) {
-            System.out.println("RIGHT UP");
-            body.setLinearVelocity(0f, 0f);
-            changeAnimation(ACTION_STANCE);
-        }
-
-        if(keycode == Input.Keys.LEFT) {
-            System.out.println("LEFT DOWN");
-            body.setLinearVelocity(0f, 0f);
-            changeAnimation(ACTION_STANCE);
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean keyTyped(char character) {
-        return false;
-    }
-
-    @Override
-    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean touchDragged(int screenX, int screenY, int pointer) {
-        return false;
-    }
-
-    @Override
-    public boolean mouseMoved(int screenX, int screenY) {
-        return false;
-    }
-
-    @Override
-    public boolean scrolled(int amount) {
-        return false;
     }
 }
