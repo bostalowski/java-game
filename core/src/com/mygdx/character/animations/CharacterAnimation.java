@@ -86,4 +86,24 @@ public abstract class CharacterAnimation
     {
         return elapsedTime;
     }
+
+    public SpriteBatch getSpriteBatch()
+    {
+        return spriteBatch;
+    }
+
+    public float getWidth()
+    {
+        return frameWidth;
+    }
+
+    public float getHeight()
+    {
+        return frameHeight;
+    }
+
+    public boolean isLastFrame()
+    {
+        return animation.getKeyFrameIndex(elapsedTime) == frames.length - 1;
+    }
 }

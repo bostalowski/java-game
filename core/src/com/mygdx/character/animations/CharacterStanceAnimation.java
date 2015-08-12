@@ -8,7 +8,7 @@ public class CharacterStanceAnimation extends CharacterAnimation implements Appl
     public static final int FRAME_COLS = 6;
     public static final int FRAME_ROWS = 1;
     public static final String SPRITE_FILENAME = "spritesheet_tengu_stance.png";
-    public static final float ANIMATION_DURATION= 0.7f;
+    public static final float ANIMATION_DURATION= 1f;
 
     public CharacterStanceAnimation(Tengu tengu)
     {
