@@ -29,10 +29,10 @@ public class Tengu extends ApplicationAdapter
     private int currentAction;
 
     private Vector2 position;
-    private Vector2 speed;
     private Vector2 direction;
 
     private Body body;
+    private Fixture fixture;
 
     private CharacterAnimation currentAnimation;
     private CharacterStanceAnimation characterStanceAnimation;
@@ -40,12 +40,14 @@ public class Tengu extends ApplicationAdapter
     private CharacterRunAnimation characterRunAnimation;
 
     boolean isOnBlockedAnimation = false;
+    boolean isOnGround = true;
 
-    public Tengu()
+    private World world;
+
+    public Tengu(World world)
     {
         this.currentAction = ACTION_STANCE;
         this.position = new Vector2(400,0);
-        this.speed = Vector2.Zero;
         this.direction = new Vector2(1,0);
 
         characterStanceAnimation = new CharacterStanceAnimation(this);
@@ -53,18 +55,20 @@ public class Tengu extends ApplicationAdapter
         characterJumpAnimation = new CharacterJumpAnimation(this);
 
         this.currentAnimation = characterStanceAnimation;
+        this.world = world;
     }
 
-    public void create(World world)
+    public void create()
     {
         characterStanceAnimation.create();
         characterRunAnimation.create();
         characterJumpAnimation.create();
-        createBody(world);
+        createBody();
     }
 
     public void update()
     {
+        isOnGround = isOnGround();
         handleKeyboard();
         position = new Vector2(MyGdxGame.MetersToPixels(body.getPosition().x) - (getWidth()/2), MyGdxGame.MetersToPixels(body.getPosition().y) - (getHeight()/2));
         currentAnimation.update();
@@ -80,13 +84,13 @@ public class Tengu extends ApplicationAdapter
     public void handleKeyboard()
     {
         boolean noKeyPressed = true;
-        Vector2 vel = body.getLinearVelocity();
-        Vector2 pos = body.getPosition();
+        Vector2 velocity = body.getLinearVelocity();
+        Vector2 position = body.getPosition();
 
         // cap max velocity on x
-        if(Math.abs(vel.x) > SPEED_RUN) {
-            vel.x = Math.signum(vel.x) * SPEED_RUN;
-            body.setLinearVelocity(vel.x, vel.y);
+        if(Math.abs(velocity.x) > SPEED_RUN) {
+            velocity.x = Math.signum(velocity.x) * SPEED_RUN;
+            body.setLinearVelocity(velocity.x, velocity.y);
         }
 
         if(Gdx.input.isKeyPressed(Input.Keys.UP))
@@ -95,32 +99,50 @@ public class Tengu extends ApplicationAdapter
         if(Gdx.input.isKeyPressed(Input.Keys.DOWN))
         {
         }
-        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT) && vel.x < SPEED_RUN )
+        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT) && velocity.x < SPEED_RUN )
         {
-            body.applyLinearImpulse(SPEED_RUN, 0, pos.x, pos.y, true);
+            body.applyLinearImpulse(SPEED_RUN, 0, position.x, position.y, true);
             direction = new Vector2(1, direction.y);
-            changeAnimation(ACTION_RUN);
+            if(isOnGround) {
+                changeAnimation(ACTION_RUN);
+            }
             noKeyPressed = false;
         }
-        if(Gdx.input.isKeyPressed(Input.Keys.LEFT) && vel.x > -SPEED_RUN )
+        if(Gdx.input.isKeyPressed(Input.Keys.LEFT) && velocity.x > -SPEED_RUN )
         {
-            body.applyLinearImpulse(-SPEED_RUN, 0, pos.x, pos.y, true);
+            body.applyLinearImpulse(-SPEED_RUN, 0, position.x, position.y, true);
             direction = new Vector2(-1, direction.y);
-            changeAnimation(ACTION_RUN);
+            if(isOnGround) {
+                changeAnimation(ACTION_RUN);
+            }
             noKeyPressed = false;
         }
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE))
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && isOnGround)
         {
-            body.setLinearVelocity(vel.x, 0);
-            body.setTransform(pos.x, pos.y + 0.01f, 0);
-            body.applyLinearImpulse(0, SPEED_JUMP, pos.x, pos.y, true);
+            body.setLinearVelocity(velocity.x, 0);
+            body.setTransform(position.x, position.y + 0.01f, 0);
+            body.applyLinearImpulse(0, SPEED_JUMP, position.x, position.y, true);
+            changeAnimation(ACTION_JUMP);
             noKeyPressed = false;
         }
 
-        if(noKeyPressed && vel.x == 0 && vel.y == 0) {
-            changeAnimation(ACTION_STANCE);
+        if(noKeyPressed && Math.abs(velocity.x) <= 3 && isOnGround) {
+            if(currentAnimation.isLastFrame()) {
+                changeAnimation(ACTION_STANCE);
+            }
         }
+    }
+
+    private boolean isOnGround()
+    {
+        for(Contact contact : world.getContactList()) {
+            if(contact.getFixtureA().equals(fixture) || contact.getFixtureB().equals(fixture)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void changeAnimation(int animation)
@@ -153,23 +175,7 @@ public class Tengu extends ApplicationAdapter
         }
     }
 
-    public Vector2 getPosition()
-    {
-        return position;
-    }
-
-    public Vector2 getDirection()
-    {
-        return direction;
-    }
-
-    public Tengu setDirection(Vector2 direction)
-    {
-        this.direction = direction;
-        return this;
-    }
-
-    public void createBody(World world)
+    public void createBody()
     {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
@@ -188,8 +194,24 @@ public class Tengu extends ApplicationAdapter
         fixtureDef.restitution = 0f;
         fixtureDef.friction = 2f;
 
-        body.createFixture(fixtureDef);
+        fixture = body.createFixture(fixtureDef);
         shape.dispose();
+    }
+
+    public Vector2 getPosition()
+    {
+        return position;
+    }
+
+    public Vector2 getDirection()
+    {
+        return direction;
+    }
+
+    public Tengu setDirection(Vector2 direction)
+    {
+        this.direction = direction;
+        return this;
     }
 
     public SpriteBatch getSpriteBatch()

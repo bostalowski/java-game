@@ -101,4 +101,9 @@ public abstract class CharacterAnimation
     {
         return frameHeight;
     }
+
+    public boolean isLastFrame()
+    {
+        return animation.getKeyFrameIndex(elapsedTime) == frames.length - 1;
+    }
 }

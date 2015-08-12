@@ -29,8 +29,8 @@ public class MyGdxGame extends ApplicationAdapter {
 		//set a world gravity
 		world = new World(new Vector2(0, -10f), true);
 
-		tengu = new Tengu();
-		tengu.create(world);
+		tengu = new Tengu(world);
+		tengu.create();
 
 		BodyDef bodyDef2 = new BodyDef();
 		bodyDef2.type = BodyDef.BodyType.StaticBody;
