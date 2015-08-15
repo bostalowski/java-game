@@ -9,7 +9,7 @@ public class CharacterRunAnimation extends CharacterAnimation implements Applica
     public static final int FRAME_COLS = 6;
     public static final int FRAME_ROWS = 1;
     public static final String SPRITE_FILENAME = "spritesheet_tengu_run.png";
-    public static final float ANIMATION_DURATION = 0.7f;
+    public static final float ANIMATION_DURATION = 0.8f;
 
     public CharacterRunAnimation(Tengu tengu)
     {
