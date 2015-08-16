@@ -1,265 +1,165 @@
 package com.mygdx.character;
 
-import com.badlogic.gdx.*;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.character.animations.CharacterAnimation;
 import com.mygdx.character.animations.CharacterJumpAnimation;
 import com.mygdx.character.animations.CharacterRunAnimation;
 import com.mygdx.character.animations.CharacterStanceAnimation;
-import com.mygdx.game.MyGdxGame;
-import com.sun.javafx.scene.traversal.Direction;
+import com.mygdx.tools.Physics;
 
-import java.awt.geom.Point2D;
-
-public class Tengu extends ApplicationAdapter
+public class Tengu extends Physics
 {
-    public static final int ACTION_STANCE = 0;
-    public static final int ACTION_JUMP = 1;
-    public static final int ACTION_RUN = 2;
-    public static final int ACTION_FALL = 3;
+    private static final int ACTION_STANCE = 0;
+    private static final int ACTION_RUN = 1;
+    private static final int ACTION_JUMP = 2;
 
-    public static final float SPEED_RUN = 5f;
-    public static final float SPEED_JUMP = 15f;
+    public static final float SPEED_RUN_MAX_VELOCITY = 10f;
+    public static final float SPEED_RUN_ACCELERATION = 0.2f;
+    public static final float SPEED_JUMP_ACCELERATION = 20f;
+
+    private static final float DIRECTION_LEFT = -1;
+    private static final float DIRECTION_RIGHT = 1;
+    private float direction;
 
     private int currentAction;
-
-    private Vector2 position;
-    private Vector2 direction;
-
-    private Body body;
-    private Fixture fixture;
-
     private CharacterAnimation currentAnimation;
-    private CharacterStanceAnimation characterStanceAnimation;
-    private CharacterJumpAnimation characterJumpAnimation;
-    private CharacterRunAnimation characterRunAnimation;
+    private CharacterAnimation characterStanceAnimation;
+    private CharacterAnimation characterRunAnimation;
+    private CharacterAnimation characterJumpAnimation;
 
-    private boolean hasDoubleJumped = false;
-    private boolean isOnGround = false;
+    private boolean isJumping;
 
-    private World world;
-
-    public Tengu(World world)
+    public Tengu(Vector2 position, float speed, float direction)
     {
+        this.position = position;
+        this.velocity = new Vector2(0, 0);
+        this.velocity.setLength(speed);
+        this.velocity.setAngle(direction);
+        this.friction = 0.1f;
+        this.direction = DIRECTION_RIGHT;
+        this.isJumping = false;
+
+        this.characterStanceAnimation = new CharacterStanceAnimation(this);
+        this.characterRunAnimation = new CharacterRunAnimation(this);
+        this.characterJumpAnimation = new CharacterJumpAnimation(this);
+
         this.currentAction = ACTION_STANCE;
-        this.position = new Vector2(400,400);
-        this.direction = new Vector2(1,0);
-
-        characterStanceAnimation = new CharacterStanceAnimation(this);
-        characterRunAnimation = new CharacterRunAnimation(this);
-        characterJumpAnimation = new CharacterJumpAnimation(this);
-
-        this.currentAnimation = characterStanceAnimation;
-        this.world = world;
+        this.currentAnimation = this.characterStanceAnimation;
     }
 
-    public void create()
+    public void update(float deltaTime)
     {
-        characterStanceAnimation.create();
-        characterRunAnimation.create();
-        characterJumpAnimation.create();
-        createBody();
-        setContactListener();
-    }
+        if(this.position.y == 0) {
+            this.friction = 0.1f;
+            isJumping = false;
+        }
 
-    public void update()
-    {
-        handleKeyboard();
-        position = new Vector2(MyGdxGame.MetersToPixels(body.getPosition().x) - (getWidth()/2), MyGdxGame.MetersToPixels(body.getPosition().y) - (getHeight()/2));
-        currentAnimation.update();
+        this.handleKeys();
+
+        //add deltatime to position to not depend on FPS
+        //this.velocity.x = this.velocity.x * deltaTime;
+        //this.velocity.y = this.velocity.y * deltaTime;
+
+        this.position.add(this.velocity);
+
+        if(position.x > Gdx.graphics.getWidth()) {
+            position.x = 0;
+        } else if (position.x < 0) {
+            position.x = Gdx.graphics.getWidth();
+        }
+
+        this.currentAnimation.update();
     }
 
     public void render()
     {
-        update();
-        currentAnimation.render();
+        this.currentAnimation.render();
     }
 
-    public void dispose() {}
-
-    public void handleKeyboard()
+    private void handleKeys()
     {
-        boolean noKeyPressed = true;
-        Vector2 velocity = body.getLinearVelocity();
-        Vector2 position = body.getPosition();
-        float angle = body.getAngle() * 100;
+        boolean isAnyKeyPressed = false;
 
-        // cap max velocity on x
-        if(Math.abs(velocity.x) > SPEED_RUN) {
-            velocity.x = Math.signum(velocity.x) * SPEED_RUN;
-            body.setLinearVelocity(velocity.x, velocity.y);
-        }
+        if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            if(this.velocity.x > -SPEED_RUN_MAX_VELOCITY) {
+                Vector2 force = new Vector2(-SPEED_RUN_ACCELERATION, 0);
 
-        if(Gdx.input.isKeyPressed(Input.Keys.UP) && !isOnGround)
-        {
-            if(velocity.y < 0) {
-                System.out.println(velocity.x);
-                body.setLinearVelocity(velocity.x, -1f);
-                //body.applyForce(0, 12f, position.x, position.y, true);
-            }
-        }
-        if(Gdx.input.isKeyPressed(Input.Keys.DOWN))
-        {
-        }
-        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT) && velocity.x < SPEED_RUN && isOnGround )
-        {
-            if(isOnGround) {
-                changeAnimation(ACTION_RUN);
-            }
-            body.applyLinearImpulse(1f, 0, position.x, position.y, true);
-            direction = new Vector2(1, direction.y);
-            noKeyPressed = false;
-        }
-        if(Gdx.input.isKeyPressed(Input.Keys.LEFT) && velocity.x > -SPEED_RUN  && isOnGround)
-        {
-            if(isOnGround) {
-                changeAnimation(ACTION_RUN);
-            }
-            body.applyLinearImpulse(-1f, 0, position.x, position.y, true);
-            direction = new Vector2(-1, direction.y);
-            noKeyPressed = false;
-        }
-
-        if ((Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && isOnGround) || (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !hasDoubleJumped))
-        {
-            //simple jump
-            if(isOnGround) {
-                changeAnimation(ACTION_JUMP);
-                body.setLinearVelocity(velocity.x, 0);
-                body.setTransform(position.x, position.y + 0.01f, 0);
-                body.applyLinearImpulse(0, SPEED_JUMP, position.x, position.y, true);
-            } else {
-                hasDoubleJumped = true;
-                changeAnimation(ACTION_JUMP);
-                body.setLinearVelocity(velocity.x, 0);
-                body.setTransform(position.x, position.y + 0.01f, 0);
-                if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-                    body.applyLinearImpulse(-SPEED_JUMP, SPEED_JUMP, position.x, position.y, true);
-                } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-                    body.applyLinearImpulse(SPEED_JUMP, SPEED_JUMP, position.x, position.y, true);
-                } else {
-                    body.applyLinearImpulse(0, SPEED_JUMP, position.x, position.y, true);
+                if(this.velocity.x > 0) {
+                    force.x = force.x + (-this.velocity.x * this.friction);
                 }
+                this.applyForce(force);
             }
-
-            noKeyPressed = false;
+            isAnyKeyPressed = true;
+            this.direction = DIRECTION_LEFT;
+            if(!isJumping) {
+                this.changeAnimation(ACTION_RUN);
+            }
         }
 
-        if(noKeyPressed && Math.abs(velocity.x) <= 3 && isOnGround) {
-            if(currentAnimation.isLastFrame()) {
+        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            if(this.velocity.x < SPEED_RUN_MAX_VELOCITY) {
+                Vector2 force = new Vector2(SPEED_RUN_ACCELERATION, 0);
+
+                if(this.velocity.x < 0) {
+                    force.x = force.x + (-this.velocity.x * this.friction);
+                }
+                this.applyForce(force);
+            }
+            isAnyKeyPressed = true;
+            this.direction = DIRECTION_RIGHT;
+            if(!isJumping) {
+                this.changeAnimation(ACTION_RUN);
+            }
+        }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            this.isJumping = true;
+            this.friction = 0;
+            Vector2 force = new Vector2(0, SPEED_JUMP_ACCELERATION);
+            this.applyForce(force);
+            this.changeAnimation(ACTION_JUMP);
+        }
+
+        if(!isAnyKeyPressed && !isJumping) {
+            if(Math.round(this.velocity.x * 100) == 0) {
+                this.velocity.x = 0;
                 changeAnimation(ACTION_STANCE);
+            } else {
+                float inertieForceX = -this.velocity.x * this.friction;
+                this.applyForce(new Vector2(inertieForceX, 0));
             }
         }
     }
 
-    private void setContactListener()
+    private void changeAnimation(int action)
     {
-        world.setContactListener(new ContactListener() {
-            @Override
-            public void beginContact(Contact contact) {
-                if(contact.getFixtureA().equals(fixture) || contact.getFixtureB().equals(fixture)) {
-                    isOnGround = true;
-                    hasDoubleJumped = false;
-                }
+        if(this.currentAction != action) {
+            this.currentAction = action;
+            switch (action) {
+                case ACTION_STANCE:
+                    this.currentAnimation = this.characterStanceAnimation;
+                    break;
+                case ACTION_RUN:
+                    this.currentAnimation = this.characterRunAnimation;
+                    break;
+                case ACTION_JUMP:
+                    this.currentAnimation = this.characterJumpAnimation;
+                    break;
+                default:
+                    this.currentAnimation = this.characterStanceAnimation;
             }
-
-            @Override
-            public void endContact(Contact contact) {
-                if(contact.getFixtureA().equals(fixture) || contact.getFixtureB().equals(fixture)) {
-                    isOnGround = false;
-                }
-            }
-
-            @Override
-            public void preSolve(Contact contact, Manifold oldManifold) {
-            }
-
-            @Override
-            public void postSolve(Contact contact, ContactImpulse impulse) {
-            }
-        });
-    }
-
-    private void changeAnimation(int animation)
-    {
-        if(animation != currentAction)
-        {
-            currentAnimation.reset();
-        }
-
-        if(animation == ACTION_STANCE)
-        {
-            currentAction = ACTION_STANCE;
-            currentAnimation = characterStanceAnimation;
-        } else if (animation == ACTION_RUN)
-        {
-            currentAction = ACTION_RUN;
-            currentAnimation = characterRunAnimation;
-        } else if (animation == ACTION_JUMP)
-        {
-            currentAction = ACTION_JUMP;
-            currentAnimation = characterJumpAnimation;
-        } else if (animation == ACTION_FALL)
-        {
-            currentAction = ACTION_FALL;
-            currentAnimation = characterJumpAnimation;
+            this.currentAnimation.reset();
         }
     }
 
-    public void createBody()
+    /**
+     * Used to draw sprite
+     * @return sprite direction (scale)
+     */
+    public float getScale()
     {
-        BodyDef bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(MyGdxGame.PixelsToMeters(position.x + getWidth()/2f), MyGdxGame.PixelsToMeters(position.y + getHeight()/2f));
-
-        // Create a body in the world using our definition
-        body = world.createBody(bodyDef);
-
-        // Now define the dimensions of the physics shape
-        PolygonShape shape = new PolygonShape();
-        shape.setAsBox(MyGdxGame.PixelsToMeters(getWidth()/2f), MyGdxGame.PixelsToMeters(getHeight()/2f), new Vector2(0, 0), 0f);
-
-        FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.shape = shape;
-        fixtureDef.density = 1f;
-        fixtureDef.restitution = 0f;
-        fixtureDef.friction = 2f;
-
-        fixture = body.createFixture(fixtureDef);
-        shape.dispose();
-    }
-
-    public Vector2 getPosition()
-    {
-        return position;
-    }
-
-    public Vector2 getDirection()
-    {
-        return direction;
-    }
-
-    public Tengu setDirection(Vector2 direction)
-    {
-        this.direction = direction;
-        return this;
-    }
-
-    public SpriteBatch getSpriteBatch()
-    {
-        return currentAnimation.getSpriteBatch();
-    }
-
-    private float getWidth()
-    {
-        return currentAnimation.getWidth();
-    }
-
-    private float getHeight()
-    {
-        return currentAnimation.getHeight();
+        return this.direction;
     }
 }

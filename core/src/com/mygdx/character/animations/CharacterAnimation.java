@@ -32,40 +32,40 @@ public abstract class CharacterAnimation
     public void create(String fileName, int frameCols, int frameRows, float animationDuration)
     {
         // Initialisation
-        spriteBatch = new SpriteBatch();
-        texture = new Texture(Gdx.files.internal(fileName));
+        this.spriteBatch = new SpriteBatch();
+        this.texture = new Texture(Gdx.files.internal(fileName));
 
         //map sprites into one dimensional array
-        TextureRegion[][] tmp = TextureRegion.split(texture, texture.getWidth()/frameCols, texture.getHeight()/frameRows);
-        frames = new TextureRegion[frameCols * frameRows];
+        TextureRegion[][] tmp = TextureRegion.split(this.texture, this.texture.getWidth()/frameCols, this.texture.getHeight()/frameRows);
+        this.frames = new TextureRegion[frameCols * frameRows];
         int index = 0;
 
         for (int i = 0; i < frameRows; i++) {
             for (int j = 0; j < frameCols; j++) {
-                frames[index++] = tmp[i][j];
+                this.frames[index++] = tmp[i][j];
             }
         }
 
         //set animation speed
-        animation = new Animation(animationDuration/(frameCols * frameRows), frames);
-        elapsedTime = 0.0f;
+        this.animation = new Animation(animationDuration/(frameCols * frameRows), this.frames);
+        this.elapsedTime = 0.0f;
     }
 
     public abstract void update();
 
     public void update(boolean loop)
     {
-        elapsedTime += Gdx.graphics.getDeltaTime();
+        this.elapsedTime += Gdx.graphics.getDeltaTime();
 
-        actualFrame = animation.getKeyFrame(elapsedTime, loop);
-        actualFrame.setRegion(actualFrame, 0, 0, frameWidth, frameHeight);
+        this.actualFrame = this.animation.getKeyFrame(this.elapsedTime, loop);
+        this.actualFrame.setRegion(this.actualFrame, 0, 0, this.frameWidth, this.frameHeight);
     }
 
     public void render()
     {
-        spriteBatch.begin();
-        spriteBatch.draw(actualFrame, tengu.getPosition().x, tengu.getPosition().y, frameWidth/2, frameHeight/2, frameWidth, frameHeight, tengu.getDirection().x, 1, 0/*, actualFrame.getRegionX(), actualFrame.getRegionY(), actualFrame.getRegionWidth(), actualFrame.getRegionHeight(), false, false*/);
-        spriteBatch.end();
+        this.spriteBatch.begin();
+        this.spriteBatch.draw(this.actualFrame, this.tengu.getPosition().x, this.tengu.getPosition().y, this.frameWidth / 2, this.frameHeight / 2, this.frameWidth, this.frameHeight, this.tengu.getScale(), 1, 0/*, actualFrame.getRegionX(), actualFrame.getRegionY(), actualFrame.getRegionWidth(), actualFrame.getRegionHeight(), false, false*/);
+        this.spriteBatch.end();
     }
 
     public void renderFrame(int frameIndex)
@@ -74,13 +74,20 @@ public abstract class CharacterAnimation
         actualFrame = tmp[frameIndex];
         actualFrame.setRegion(actualFrame, 0, 0, frameWidth, frameHeight);
 
+        int scale = (int) Math.signum(Math.atan2(this.tengu.getVelocity().x, this.tengu.getVelocity().y));
+        scale = scale == 0 ? 1 : scale;
+
         spriteBatch.begin();
-        spriteBatch.draw(actualFrame, tengu.getPosition().x, tengu.getPosition().y, frameWidth/2, frameHeight/2, frameWidth, frameHeight, tengu.getDirection().x, 1, 0/*, actualFrame.getRegionX(), actualFrame.getRegionY(), actualFrame.getRegionWidth(), actualFrame.getRegionHeight(), false, false*/);
+        spriteBatch.draw(actualFrame, tengu.getPosition().x, tengu.getPosition().y, frameWidth / 2, frameHeight / 2, frameWidth, frameHeight, scale, 1, 0/*, actualFrame.getRegionX(), actualFrame.getRegionY(), actualFrame.getRegionWidth(), actualFrame.getRegionHeight(), false, false*/);
         spriteBatch.end();
     }
 
+    public void reset()
+    {
+        this.elapsedTime = 0;
+    }
+
     public abstract boolean isAnimationFinished();
-    public abstract void reset();
 
     public float getElapsedTime()
     {
@@ -105,5 +112,11 @@ public abstract class CharacterAnimation
     public boolean isLastFrame()
     {
         return animation.getKeyFrameIndex(elapsedTime) == frames.length - 1;
+    }
+
+    public void setAnimationDuration(float animationDuration, int frameCols, int frameRows)
+    {
+        System.out.println(animationDuration);
+        this.animation.setFrameDuration(animationDuration/(frameCols * frameRows));
     }
 }

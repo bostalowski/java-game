@@ -9,11 +9,12 @@ public class CharacterJumpAnimation extends CharacterAnimation implements Applic
     public static final int FRAME_COLS = 9;
     public static final int FRAME_ROWS = 1;
     public static final String SPRITE_FILENAME = "spritesheet_tengu_jump.png";
-    public static final float ANIMATION_DURATION = 0.5f;
+    public static final float ANIMATION_DURATION = 0.6f;
 
     public CharacterJumpAnimation(Tengu tengu)
     {
         super(175, 175, tengu);
+        this.create();
     }
 
     @Override
@@ -49,17 +50,5 @@ public class CharacterJumpAnimation extends CharacterAnimation implements Applic
     public boolean isAnimationFinished()
     {
         return animation.isAnimationFinished(elapsedTime);
-    }
-
-    @Override
-    public void reset()
-    {
-        elapsedTime = 0f;
-        tengu.setDirection(new Vector2(tengu.getDirection().x, 0));
-    }
-
-    public void start()
-    {
-        elapsedTime = 0f;
     }
 }

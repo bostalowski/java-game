@@ -9,11 +9,12 @@ public class CharacterRunAnimation extends CharacterAnimation implements Applica
     public static final int FRAME_COLS = 6;
     public static final int FRAME_ROWS = 1;
     public static final String SPRITE_FILENAME = "spritesheet_tengu_run.png";
-    public static final float ANIMATION_DURATION = 0.8f;
+    public static final float ANIMATION_DURATION = 0.5f;
 
     public CharacterRunAnimation(Tengu tengu)
     {
         super(175, 175, tengu);
+        this.create();
     }
 
     @Override
@@ -28,6 +29,7 @@ public class CharacterRunAnimation extends CharacterAnimation implements Applica
     @Override
     public void update()
     {
+        this.setAnimationDuration(Tengu.SPEED_RUN_MAX_VELOCITY - Math.round(Math.abs(this.tengu.getVelocity().x)) + ANIMATION_DURATION, FRAME_COLS, FRAME_ROWS);
         super.update(true);
     }
 
@@ -45,12 +47,6 @@ public class CharacterRunAnimation extends CharacterAnimation implements Applica
 
     @Override
     public void dispose() {}
-
-    @Override
-    public void reset()
-    {
-        elapsedTime = 0f;
-    }
 
     @Override
     public boolean isAnimationFinished() {

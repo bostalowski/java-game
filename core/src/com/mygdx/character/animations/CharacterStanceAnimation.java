@@ -13,6 +13,7 @@ public class CharacterStanceAnimation extends CharacterAnimation implements Appl
     public CharacterStanceAnimation(Tengu tengu)
     {
         super(175, 175, tengu);
+        this.create();
     }
 
     @Override
