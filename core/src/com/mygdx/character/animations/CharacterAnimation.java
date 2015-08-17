@@ -116,7 +116,7 @@ public abstract class CharacterAnimation
 
     public void setAnimationDuration(float animationDuration, int frameCols, int frameRows)
     {
-        System.out.println(animationDuration);
-        this.animation.setFrameDuration(animationDuration/(frameCols * frameRows));
+        //System.out.println(animationDuration);
+        //this.animation.setFrameDuration(animationDuration/(frameCols * frameRows));
     }
 }

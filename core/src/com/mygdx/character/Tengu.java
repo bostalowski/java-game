@@ -16,8 +16,12 @@ public class Tengu extends Physics
     private static final int ACTION_JUMP = 2;
 
     public static final float SPEED_RUN_MAX_VELOCITY = 10f;
-    public static final float SPEED_RUN_ACCELERATION = 0.2f;
+    public static final float SPEED_RUN_ACCELERATION = 0.8f;
     public static final float SPEED_JUMP_ACCELERATION = 20f;
+
+    public static final float FRICTION_ON_AIR = 0;
+    public static final float FRICTION_ON_GROUND = 0.4f;
+    public static final float FRICTION_ON_PARACHUTE = 1f;
 
     private static final float DIRECTION_LEFT = -1;
     private static final float DIRECTION_RIGHT = 1;
@@ -30,6 +34,7 @@ public class Tengu extends Physics
     private CharacterAnimation characterJumpAnimation;
 
     private boolean isJumping;
+    private boolean hasDoubleJumped;
 
     public Tengu(Vector2 position, float speed, float direction)
     {
@@ -37,9 +42,10 @@ public class Tengu extends Physics
         this.velocity = new Vector2(0, 0);
         this.velocity.setLength(speed);
         this.velocity.setAngle(direction);
-        this.friction = 0.1f;
+        this.friction = new Vector2(0, 0);
         this.direction = DIRECTION_RIGHT;
         this.isJumping = false;
+        this.hasDoubleJumped = false;
 
         this.characterStanceAnimation = new CharacterStanceAnimation(this);
         this.characterRunAnimation = new CharacterRunAnimation(this);
@@ -52,8 +58,11 @@ public class Tengu extends Physics
     public void update(float deltaTime)
     {
         if(this.position.y == 0) {
-            this.friction = 0.1f;
-            isJumping = false;
+            this.friction = new Vector2(FRICTION_ON_GROUND, 0);
+            this.isJumping = false;
+            this.hasDoubleJumped = false;
+        } else {
+            this.friction = new Vector2(FRICTION_ON_AIR, 0);
         }
 
         this.handleKeys();
@@ -62,6 +71,13 @@ public class Tengu extends Physics
         //this.velocity.x = this.velocity.x * deltaTime;
         //this.velocity.y = this.velocity.y * deltaTime;
 
+        this.friction.setAngle(this.velocity.angle());
+
+        if(this.velocity.len() > this.friction.len()) {
+            this.velocity.sub(this.friction);
+        } else {
+            this.velocity = Vector2.Zero;
+        }
         this.position.add(this.velocity);
 
         if(position.x > Gdx.graphics.getWidth()) {
@@ -85,10 +101,6 @@ public class Tengu extends Physics
         if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             if(this.velocity.x > -SPEED_RUN_MAX_VELOCITY) {
                 Vector2 force = new Vector2(-SPEED_RUN_ACCELERATION, 0);
-
-                if(this.velocity.x > 0) {
-                    force.x = force.x + (-this.velocity.x * this.friction);
-                }
                 this.applyForce(force);
             }
             isAnyKeyPressed = true;
@@ -101,10 +113,6 @@ public class Tengu extends Physics
         if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             if(this.velocity.x < SPEED_RUN_MAX_VELOCITY) {
                 Vector2 force = new Vector2(SPEED_RUN_ACCELERATION, 0);
-
-                if(this.velocity.x < 0) {
-                    force.x = force.x + (-this.velocity.x * this.friction);
-                }
                 this.applyForce(force);
             }
             isAnyKeyPressed = true;
@@ -114,9 +122,16 @@ public class Tengu extends Physics
             }
         }
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+        if(Gdx.input.isKeyPressed(Input.Keys.UP) && Math.signum(this.velocity.y) == -1) {
+            this.friction = new Vector2(FRICTION_ON_PARACHUTE, 0);
+            this.velocity = new Vector2(this.velocity.x, -2.5f);
+        }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && !this.hasDoubleJumped) {
+            if(this.isJumping) {
+                this.hasDoubleJumped = true;
+            }
             this.isJumping = true;
-            this.friction = 0;
             Vector2 force = new Vector2(0, SPEED_JUMP_ACCELERATION);
             this.applyForce(force);
             this.changeAnimation(ACTION_JUMP);
@@ -126,9 +141,6 @@ public class Tengu extends Physics
             if(Math.round(this.velocity.x * 100) == 0) {
                 this.velocity.x = 0;
                 changeAnimation(ACTION_STANCE);
-            } else {
-                float inertieForceX = -this.velocity.x * this.friction;
-                this.applyForce(new Vector2(inertieForceX, 0));
             }
         }
     }

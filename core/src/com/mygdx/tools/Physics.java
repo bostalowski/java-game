@@ -7,7 +7,7 @@ public class Physics
     protected Vector2 position,
             velocity;
 
-    protected float friction = 0;
+    protected Vector2 friction;
 
     public Vector2 getPosition()
     {
@@ -53,12 +53,12 @@ public class Physics
         return this;
     }
 
-    public float getFriction()
+    public Vector2 getFriction()
     {
         return this.friction;
     }
 
-    public Physics setFriction(float friction)
+    public Physics setFriction(Vector2 friction)
     {
         this.friction = friction;
         return this;
