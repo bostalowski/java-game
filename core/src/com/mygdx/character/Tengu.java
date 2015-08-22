@@ -2,6 +2,7 @@ package com.mygdx.character;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.character.animations.CharacterAnimation;
 import com.mygdx.character.animations.CharacterJumpAnimation;
@@ -16,11 +17,11 @@ public class Tengu extends Physics
     private static final int ACTION_JUMP = 2;
 
     public static final float SPEED_RUN_MAX_VELOCITY = 10f;
-    public static final float SPEED_RUN_ACCELERATION = 0.8f;
+    public static final float SPEED_RUN_ACCELERATION = 5f;
     public static final float SPEED_JUMP_ACCELERATION = 20f;
 
     public static final float FRICTION_ON_AIR = 0;
-    public static final float FRICTION_ON_GROUND = 0.4f;
+    public static final float FRICTION_ON_GROUND = 1f;
     public static final float FRICTION_ON_PARACHUTE = 1f;
 
     private static final float DIRECTION_LEFT = -1;
@@ -33,6 +34,7 @@ public class Tengu extends Physics
     private CharacterAnimation characterRunAnimation;
     private CharacterAnimation characterJumpAnimation;
 
+    private boolean isOnGround;
     private boolean isJumping;
     private boolean hasDoubleJumped;
 
@@ -44,6 +46,7 @@ public class Tengu extends Physics
         this.velocity.setAngle(direction);
         this.friction = new Vector2(0, 0);
         this.direction = DIRECTION_RIGHT;
+        this.isOnGround = true;
         this.isJumping = false;
         this.hasDoubleJumped = false;
 
@@ -57,27 +60,29 @@ public class Tengu extends Physics
 
     public void update(float deltaTime)
     {
-        if(this.position.y == 0) {
+        if((this.position.y == 0 && !Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) || isOnGround) {
+            //this.isOnGround = true;
             this.friction = new Vector2(FRICTION_ON_GROUND, 0);
             this.isJumping = false;
             this.hasDoubleJumped = false;
+            //gravity balance
+            if(this.position.y == 0) {
+                this.velocity.add(0, 1);
+            }
         } else {
             this.friction = new Vector2(FRICTION_ON_AIR, 0);
         }
-
-        this.handleKeys();
 
         //add deltatime to position to not depend on FPS
         //this.velocity.x = this.velocity.x * deltaTime;
         //this.velocity.y = this.velocity.y * deltaTime;
 
-        this.friction.setAngle(this.velocity.angle());
-
         if(this.velocity.len() > this.friction.len()) {
-            this.velocity.sub(this.friction);
+            this.velocity.setLength(this.velocity.len() - this.friction.len());
         } else {
-            this.velocity = Vector2.Zero;
+            this.velocity = new Vector2(0, 0);
         }
+
         this.position.add(this.velocity);
 
         if(position.x > Gdx.graphics.getWidth()) {
@@ -94,7 +99,7 @@ public class Tengu extends Physics
         this.currentAnimation.render();
     }
 
-    private void handleKeys()
+    public void handleKeys()
     {
         boolean isAnyKeyPressed = false;
 
@@ -132,7 +137,9 @@ public class Tengu extends Physics
                 this.hasDoubleJumped = true;
             }
             this.isJumping = true;
-            Vector2 force = new Vector2(0, SPEED_JUMP_ACCELERATION);
+            this.isOnGround = false;
+            //ajust force to avoid velocity
+            Vector2 force = new Vector2(0, SPEED_JUMP_ACCELERATION - this.velocity.y);
             this.applyForce(force);
             this.changeAnimation(ACTION_JUMP);
         }
@@ -173,5 +180,26 @@ public class Tengu extends Physics
     public float getScale()
     {
         return this.direction;
+    }
+
+    public float getWidth()
+    {
+        return this.currentAnimation.getWidth();
+    }
+
+    public float getHeight()
+    {
+        return this.currentAnimation.getHeight();
+    }
+
+    public Tengu isOnGround(boolean isOnGround)
+    {
+        this.isOnGround = isOnGround;
+        return this;
+    }
+
+    public Vector2 getFiction()
+    {
+        return this.friction;
     }
 }
