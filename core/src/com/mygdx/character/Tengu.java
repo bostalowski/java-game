@@ -60,15 +60,10 @@ public class Tengu extends Physics
 
     public void update(float deltaTime)
     {
-        if((this.position.y == 0 && !Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) || isOnGround) {
-            //this.isOnGround = true;
+        if(isOnGround) {
             this.friction = new Vector2(FRICTION_ON_GROUND, 0);
             this.isJumping = false;
             this.hasDoubleJumped = false;
-            //gravity balance
-            if(this.position.y == 0) {
-                this.velocity.add(0, 1);
-            }
         } else {
             this.friction = new Vector2(FRICTION_ON_AIR, 0);
         }
@@ -103,10 +98,20 @@ public class Tengu extends Physics
     {
         boolean isAnyKeyPressed = false;
 
+        if(Gdx.input.isKeyJustPressed(Input.Keys.A)) {
+            //enable debug
+            boolean debug = false;
+        }
+
         if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             if(this.velocity.x > -SPEED_RUN_MAX_VELOCITY) {
-                Vector2 force = new Vector2(-SPEED_RUN_ACCELERATION, 0);
-                this.applyForce(force);
+                if(this.velocity.x - SPEED_RUN_ACCELERATION < -SPEED_RUN_MAX_VELOCITY) {
+                    Vector2 force = new Vector2(-(SPEED_RUN_MAX_VELOCITY + this.velocity.x), 0);
+                    this.applyForce(force);
+                } else {
+                    Vector2 force = new Vector2(-SPEED_RUN_ACCELERATION, 0);
+                    this.applyForce(force);
+                }
             }
             isAnyKeyPressed = true;
             this.direction = DIRECTION_LEFT;
@@ -117,8 +122,13 @@ public class Tengu extends Physics
 
         if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             if(this.velocity.x < SPEED_RUN_MAX_VELOCITY) {
-                Vector2 force = new Vector2(SPEED_RUN_ACCELERATION, 0);
-                this.applyForce(force);
+                if(this.velocity.x + SPEED_RUN_ACCELERATION > SPEED_RUN_MAX_VELOCITY) {
+                    Vector2 force = new Vector2(SPEED_RUN_MAX_VELOCITY - this.velocity.x, 0);
+                    this.applyForce(force);
+                } else {
+                    Vector2 force = new Vector2(SPEED_RUN_ACCELERATION, 0);
+                    this.applyForce(force);
+                }
             }
             isAnyKeyPressed = true;
             this.direction = DIRECTION_RIGHT;
@@ -201,5 +211,10 @@ public class Tengu extends Physics
     public Vector2 getFiction()
     {
         return this.friction;
+    }
+
+    public Rectangle getRectangle(Rectangle rectangle)
+    {
+        return rectangle.setX(this.position.x).setY(this.position.y).setWidth(this.getWidth()).setHeight(this.getHeight());
     }
 }
