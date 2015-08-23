@@ -19,6 +19,7 @@ public class Tengu extends Physics
     public static final float SPEED_RUN_MAX_VELOCITY = 10f;
     public static final float SPEED_RUN_ACCELERATION = 5f;
     public static final float SPEED_JUMP_ACCELERATION = 20f;
+    public static final float SPEED_DASH_ACCELERATION = 20f;
 
     public static final float FRICTION_ON_AIR = 0;
     public static final float FRICTION_ON_GROUND = 1f;
@@ -34,9 +35,14 @@ public class Tengu extends Physics
     private CharacterAnimation characterRunAnimation;
     private CharacterAnimation characterJumpAnimation;
 
-    private boolean isOnGround;
-    private boolean isJumping;
-    private boolean hasDoubleJumped;
+    private boolean isOnGround,
+            isJumping,
+            hasDoubleJumped,
+            isDashingLeft,
+            isDashingRight;
+
+    public static final float DASH_MAX_DISTANCE = 300f;
+    private float elapsedDashDistance;
 
     public Tengu(Vector2 position, float speed, float direction)
     {
@@ -49,6 +55,9 @@ public class Tengu extends Physics
         this.isOnGround = true;
         this.isJumping = false;
         this.hasDoubleJumped = false;
+        this.isDashingLeft = false;
+        this.isDashingRight = false;
+        this.elapsedDashDistance = 0;
 
         this.characterStanceAnimation = new CharacterStanceAnimation(this);
         this.characterRunAnimation = new CharacterRunAnimation(this);
@@ -68,13 +77,25 @@ public class Tengu extends Physics
             this.friction = new Vector2(FRICTION_ON_AIR, 0);
         }
 
-        //add deltatime to position to not depend on FPS
-        //this.velocity.x = this.velocity.x * deltaTime;
-        //this.velocity.y = this.velocity.y * deltaTime;
-
         if(this.velocity.len() > this.friction.len()) {
             this.velocity.setLength(this.velocity.len() - this.friction.len());
         } else {
+            this.velocity = new Vector2(0, 0);
+        }
+
+        if((this.isDashingLeft || this.isDashingRight) && this.elapsedDashDistance < DASH_MAX_DISTANCE) {
+            float direction = isDashingLeft ? -1 : 1;
+            if(this.elapsedDashDistance + SPEED_DASH_ACCELERATION > DASH_MAX_DISTANCE) {
+                this.velocity = new Vector2((DASH_MAX_DISTANCE - this.elapsedDashDistance) * direction, 0);
+            } else {
+                this.velocity = new Vector2(SPEED_DASH_ACCELERATION * direction, 0);
+            }
+            this.elapsedDashDistance += Math.abs(this.velocity.x);
+        }
+
+        if(this.elapsedDashDistance >= DASH_MAX_DISTANCE && (this.isDashingLeft || this.isDashingRight)) {
+            this.isDashingLeft = false;
+            this.isDashingRight = false;
             this.velocity = new Vector2(0, 0);
         }
 
@@ -98,7 +119,7 @@ public class Tengu extends Physics
     {
         boolean isAnyKeyPressed = false;
 
-        if(Gdx.input.isKeyJustPressed(Input.Keys.A)) {
+        if(Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             //enable debug
             boolean debug = false;
         }
@@ -152,6 +173,16 @@ public class Tengu extends Physics
             Vector2 force = new Vector2(0, SPEED_JUMP_ACCELERATION - this.velocity.y);
             this.applyForce(force);
             this.changeAnimation(ACTION_JUMP);
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.A) && !(this.isDashingLeft || this.isDashingRight)) {
+            this.isDashingLeft = true;
+            this.elapsedDashDistance = 0f;
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.E) && !(this.isDashingLeft || this.isDashingRight)) {
+            this.isDashingRight = true;
+            this.elapsedDashDistance = 0f;
         }
 
         if(!isAnyKeyPressed && !isJumping) {
