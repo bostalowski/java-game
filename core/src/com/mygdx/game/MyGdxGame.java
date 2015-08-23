@@ -51,6 +51,9 @@ public class MyGdxGame extends ApplicationAdapter {
 		this.tengu.update(deltaTime);
 
 		this.handleCollisions(oldTenguPosition);
+
+		//add delta time to position ?
+		//System.out.println((oldTenguPosition.x - this.tengu.getPosition().x) * deltaTime * 10);
 	}
 
 
