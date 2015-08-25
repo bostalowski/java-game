@@ -2,21 +2,31 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.controllers.Controller;
+import com.badlogic.gdx.controllers.ControllerListener;
+import com.badlogic.gdx.controllers.Controllers;
+import com.badlogic.gdx.controllers.PovDirection;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Pool;
 import com.mygdx.character.Tengu;
 import com.mygdx.environment.Plateform;
 import com.mygdx.tools.Gravity;
+import com.mygdx.tools.XBox360Pad;
 
 import java.util.ArrayList;
 
 
-public class MyGdxGame extends ApplicationAdapter {
+public class MyGdxGame extends ApplicationAdapter implements ControllerListener, InputProcessor {
 
     private Gravity gravity;
 	private Tengu tengu;
+
+	Controller controller;
 
 	private Pool<Rectangle> rectanglePool = new Pool<Rectangle>() {
 		@Override
@@ -30,7 +40,15 @@ public class MyGdxGame extends ApplicationAdapter {
 	@Override
 	public void create ()
 	{
-        this.gravity = new Gravity();
+		// Listen to all controllers, not just one
+		Controllers.addListener(this);
+		Gdx.input.setInputProcessor(this);
+
+		if(Controllers.getControllers().size > 0) {
+			this.controller = Controllers.getControllers().first();
+		}
+
+		this.gravity = new Gravity();
 
 		this.tengu = new Tengu(new Vector2(0, 20), 0, 0);
         this.gravity.addGravityAffectedElement(this.tengu);
@@ -47,7 +65,11 @@ public class MyGdxGame extends ApplicationAdapter {
 		//apply gravity
 		this.gravity.applyGravity();
 
-		this.tengu.handleKeys();
+		//TODO Check if on keyboard or controller
+		this.handleKeyboard();
+		this.handleController();
+
+		//this.tengu.handleKeys();
 		this.tengu.update(deltaTime);
 
 		this.handleCollisions(oldTenguPosition);
@@ -121,8 +143,161 @@ public class MyGdxGame extends ApplicationAdapter {
 			this.rectanglePool.free(plateformRectangle);
 		}
 
-		this.tengu.isOnGround(isTenguOnGround);
+		this.tengu.setIsOnGround(isTenguOnGround);
 
 		this.rectanglePool.free(tenguRectangle);
+	}
+
+	public void handleKeyboard()
+	{
+		//MOVE LEFT
+		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+			this.tengu.moveLeft();
+		}
+
+		//MOVE RIGHT
+		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+			this.tengu.moveRight();
+		}
+
+		//PARACHUTE
+		if(Gdx.input.isKeyPressed(Input.Keys.UP)) {
+			this.tengu.deployParachute();
+		}
+	}
+
+	public void handleController()
+	{
+		if(this.controller != null) {
+			//MOVE LEFT
+			if(this.controller.getAxis(XBox360Pad.AXIS_LEFT_X) < -0.2f) {
+				this.tengu.moveLeft();
+			}
+
+			//MOVE RIGHT
+			if(this.controller.getAxis(XBox360Pad.AXIS_LEFT_X) > 0.2f ) {
+				this.tengu.moveRight();
+			}
+
+			//PARACHUTE
+			if(this.controller.getButton(XBox360Pad.BUTTON_X)) {
+				this.tengu.deployParachute();
+			}
+		}
+	}
+
+	@Override
+	public void connected(Controller controller) {
+
+	}
+
+	@Override
+	public void disconnected(Controller controller) {
+
+	}
+
+	@Override
+	public boolean buttonDown(Controller controller, int buttonCode) {
+		//JUMP
+		if(buttonCode == XBox360Pad.BUTTON_A) {
+			this.tengu.jump();
+		}
+
+		return true;
+	}
+
+	@Override
+	public boolean buttonUp(Controller controller, int buttonCode) {
+		return false;
+	}
+
+	@Override
+	public boolean axisMoved(Controller controller, int axisCode, float value) {
+		//DASH LEFT
+		if(axisCode == XBox360Pad.AXIS_LEFT_TRIGGER && value > 0.2f) {
+			this.tengu.dashLeft();
+		}
+
+		//DASH RIGHT
+		if(axisCode == XBox360Pad.AXIS_RIGHT_TRIGGER && value < -0.2f) {
+			this.tengu.dashRight();
+		}
+
+		return true;
+	}
+
+	@Override
+	public boolean povMoved(Controller controller, int povCode, PovDirection value) {
+		return false;
+	}
+
+	@Override
+	public boolean xSliderMoved(Controller controller, int sliderCode, boolean value) {
+		return false;
+	}
+
+	@Override
+	public boolean ySliderMoved(Controller controller, int sliderCode, boolean value) {
+		return false;
+	}
+
+	@Override
+	public boolean accelerometerMoved(Controller controller, int accelerometerCode, Vector3 value) {
+		return false;
+	}
+
+	@Override
+	public boolean keyDown(int keycode) {
+		//JUMP
+		if(keycode == Input.Keys.SPACE) {
+			this.tengu.jump();
+		}
+
+		//DASH LEFT
+		if(keycode == Input.Keys.A) {
+			this.tengu.dashLeft();
+		}
+
+		//DASH RIGHT
+		if(keycode == Input.Keys.E) {
+			this.tengu.dashRight();
+		}
+
+		return true;
+	}
+
+	@Override
+	public boolean keyUp(int keycode) {
+		return false;
+	}
+
+	@Override
+	public boolean keyTyped(char character) {
+		return false;
+	}
+
+	@Override
+	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+		return false;
+	}
+
+	@Override
+	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+		return false;
+	}
+
+	@Override
+	public boolean touchDragged(int screenX, int screenY, int pointer) {
+		return false;
+	}
+
+	@Override
+	public boolean mouseMoved(int screenX, int screenY) {
+		return false;
+	}
+
+	@Override
+	public boolean scrolled(int amount) {
+		return false;
 	}
 }
