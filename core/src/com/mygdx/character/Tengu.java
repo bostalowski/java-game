@@ -3,10 +3,7 @@ package com.mygdx.character;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.character.animations.CharacterAnimation;
-import com.mygdx.character.animations.CharacterJumpAnimation;
-import com.mygdx.character.animations.CharacterRunAnimation;
-import com.mygdx.character.animations.CharacterStanceAnimation;
+import com.mygdx.character.animations.*;
 import com.mygdx.tools.Physics;
 
 public class Tengu extends Physics
@@ -14,6 +11,7 @@ public class Tengu extends Physics
     private static final int ACTION_STANCE = 0;
     private static final int ACTION_RUN = 1;
     private static final int ACTION_JUMP = 2;
+    private static final int ACTION_DOUBLE_JUMP = 3;
 
     public static final float SPEED_RUN_MAX_VELOCITY = 10f;
     public static final float SPEED_RUN_ACCELERATION = 5f;
@@ -33,6 +31,7 @@ public class Tengu extends Physics
     private CharacterAnimation characterStanceAnimation;
     private CharacterAnimation characterRunAnimation;
     private CharacterAnimation characterJumpAnimation;
+    private CharacterAnimation characterDoubleJumpAnimation;
 
     private boolean isOnGround,
             isJumping,
@@ -63,6 +62,7 @@ public class Tengu extends Physics
         this.characterStanceAnimation = new CharacterStanceAnimation(this);
         this.characterRunAnimation = new CharacterRunAnimation(this);
         this.characterJumpAnimation = new CharacterJumpAnimation(this);
+        this.characterDoubleJumpAnimation = new CharacterDoubleJumpAnimation(this);
 
         this.currentAction = ACTION_STANCE;
         this.currentAnimation = this.characterStanceAnimation;
@@ -126,18 +126,20 @@ public class Tengu extends Physics
 
     public void jump()
     {
-        if(!this.hasDoubleJumped) {
-            if(this.isJumping) {
-                this.hasDoubleJumped = true;
-            }
+        if(!this.isJumping && !this.hasDoubleJumped) {
             this.isJumping = true;
-            this.isOnGround = false;
-            this.isAnyKeyPressed = true;
-            //ajust force to avoid velocity
-            Vector2 force = new Vector2(0, SPEED_JUMP_ACCELERATION - this.velocity.y);
-            this.applyForce(force);
-            this.changeAnimation(ACTION_JUMP);
+            changeAnimation(ACTION_JUMP);
+        } else if(this.isJumping && !this.hasDoubleJumped) {
+            this.hasDoubleJumped = true;
+            changeAnimation(ACTION_DOUBLE_JUMP);
+        } else {
+            return;
         }
+
+        this.isAnyKeyPressed = true;
+        this.isOnGround = false;
+        Vector2 force = new Vector2(0, SPEED_JUMP_ACCELERATION - this.velocity.y);
+        this.applyForce(force);
     }
 
     public void moveLeft()
@@ -213,6 +215,9 @@ public class Tengu extends Physics
                     break;
                 case ACTION_JUMP:
                     this.currentAnimation = this.characterJumpAnimation;
+                    break;
+                case ACTION_DOUBLE_JUMP:
+                    this.currentAnimation = this.characterDoubleJumpAnimation;
                     break;
                 default:
                     this.currentAnimation = this.characterStanceAnimation;
