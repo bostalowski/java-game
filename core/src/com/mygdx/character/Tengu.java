@@ -13,6 +13,7 @@ public class Tengu extends Physics
     private static final int ACTION_JUMP = 2;
     private static final int ACTION_DOUBLE_JUMP = 3;
     private static final int ACTION_FALL = 4;
+    private static final int ACTION_SLIDE = 5;
 
     public static final float SPEED_RUN_MAX_VELOCITY = 10f;
     public static final float SPEED_RUN_ACCELERATION = 5f;
@@ -34,6 +35,7 @@ public class Tengu extends Physics
     private CharacterAnimation characterJumpAnimation;
     private CharacterAnimation characterDoubleJumpAnimation;
     private CharacterAnimation characterFallAnimation;
+    private CharacterAnimation characterSlideAnimation;
 
     private boolean isOnGround,
             isJumping,
@@ -66,6 +68,7 @@ public class Tengu extends Physics
         this.characterJumpAnimation = new CharacterJumpAnimation(this);
         this.characterDoubleJumpAnimation = new CharacterDoubleJumpAnimation(this);
         this.characterFallAnimation = new CharacterFallAnimation(this);
+        this.characterSlideAnimation = new CharacterSlideAnimation(this);
 
         this.currentAction = ACTION_STANCE;
         this.currentAnimation = this.characterStanceAnimation;
@@ -73,13 +76,6 @@ public class Tengu extends Physics
 
     public void update(float deltaTime)
     {
-        if(!this.isAnyKeyPressed && !this.isJumping) {
-            if(Math.round(this.velocity.x * 100) == 0) {
-                this.velocity.x = 0;
-                changeAnimation(ACTION_STANCE);
-            }
-        }
-
         if(isOnGround) {
             this.friction = new Vector2(FRICTION_ON_GROUND, 0);
             this.isJumping = false;
@@ -116,10 +112,20 @@ public class Tengu extends Physics
 
         this.position.add(this.velocity);
 
-        if(position.x > Gdx.graphics.getWidth()) {
-            position.x = 0;
-        } else if (position.x < 0) {
-            position.x = Gdx.graphics.getWidth();
+//        if(position.x > Gdx.graphics.getWidth()) {
+//            position.x = 0;
+//        } else if (position.x < 0) {
+//            position.x = Gdx.graphics.getWidth();
+//        }
+
+        if(!this.isAnyKeyPressed && !this.isJumping) {
+            if(Math.abs(this.velocity.x) > 2) {
+                changeAnimation(ACTION_SLIDE);
+            }
+            if(Math.round(this.velocity.x * 100) == 0) {
+                this.velocity.x = 0;
+                changeAnimation(ACTION_STANCE);
+            }
         }
 
         this.currentAnimation.update();
@@ -229,6 +235,9 @@ public class Tengu extends Physics
                 case ACTION_FALL:
                     this.currentAnimation = this.characterFallAnimation;
                     break;
+                case ACTION_SLIDE:
+                    this.currentAnimation = this.characterSlideAnimation;
+                    break;
                 default:
                     this.currentAnimation = this.characterStanceAnimation;
             }
@@ -264,13 +273,5 @@ public class Tengu extends Physics
     public Rectangle getRectangle(Rectangle rectangle)
     {
         return rectangle.setX(this.position.x).setY(this.position.y).setWidth(this.getWidth()).setHeight(this.getHeight());
-    }
-
-    public boolean overlaps(Rectangle rectangle)
-    {
-        return
-                this.position.x <= rectangle.x + rectangle.width && this.position.x + this.getWidth() >= rectangle.x
-                &&
-                this.position.y <= rectangle.y + rectangle.height && this.position.y + this.getHeight() >= rectangle.y;
     }
 }

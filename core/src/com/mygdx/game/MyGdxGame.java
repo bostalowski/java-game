@@ -54,7 +54,7 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
         this.gravity.addGravityAffectedElement(this.tengu);
 
 		this.plateformList = new ArrayList<>();
-		plateformList.add(new Plateform(0, -50, Gdx.graphics.getWidth()*10, 60));
+		plateformList.add(new Plateform(0, -100, Gdx.graphics.getWidth()*10, 110));
 		plateformList.add(new Plateform(300, 250, 200, 100));
 	}
 
