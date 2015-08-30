@@ -12,6 +12,7 @@ public class Tengu extends Physics
     private static final int ACTION_RUN = 1;
     private static final int ACTION_JUMP = 2;
     private static final int ACTION_DOUBLE_JUMP = 3;
+    private static final int ACTION_FALL = 4;
 
     public static final float SPEED_RUN_MAX_VELOCITY = 10f;
     public static final float SPEED_RUN_ACCELERATION = 5f;
@@ -32,6 +33,7 @@ public class Tengu extends Physics
     private CharacterAnimation characterRunAnimation;
     private CharacterAnimation characterJumpAnimation;
     private CharacterAnimation characterDoubleJumpAnimation;
+    private CharacterAnimation characterFallAnimation;
 
     private boolean isOnGround,
             isJumping,
@@ -63,6 +65,7 @@ public class Tengu extends Physics
         this.characterRunAnimation = new CharacterRunAnimation(this);
         this.characterJumpAnimation = new CharacterJumpAnimation(this);
         this.characterDoubleJumpAnimation = new CharacterDoubleJumpAnimation(this);
+        this.characterFallAnimation = new CharacterFallAnimation(this);
 
         this.currentAction = ACTION_STANCE;
         this.currentAnimation = this.characterStanceAnimation;
@@ -83,6 +86,10 @@ public class Tengu extends Physics
             this.hasDoubleJumped = false;
         } else {
             this.friction = new Vector2(FRICTION_ON_AIR, 0);
+            //is falling ?
+            if(this.velocity.y < 0) {
+                changeAnimation(ACTION_FALL);
+            }
         }
 
         if(this.velocity.len() > this.friction.len()) {
@@ -219,6 +226,9 @@ public class Tengu extends Physics
                 case ACTION_DOUBLE_JUMP:
                     this.currentAnimation = this.characterDoubleJumpAnimation;
                     break;
+                case ACTION_FALL:
+                    this.currentAnimation = this.characterFallAnimation;
+                    break;
                 default:
                     this.currentAnimation = this.characterStanceAnimation;
             }
@@ -254,5 +264,13 @@ public class Tengu extends Physics
     public Rectangle getRectangle(Rectangle rectangle)
     {
         return rectangle.setX(this.position.x).setY(this.position.y).setWidth(this.getWidth()).setHeight(this.getHeight());
+    }
+
+    public boolean overlaps(Rectangle rectangle)
+    {
+        return
+                this.position.x <= rectangle.x + rectangle.width && this.position.x + this.getWidth() >= rectangle.x
+                &&
+                this.position.y <= rectangle.y + rectangle.height && this.position.y + this.getHeight() >= rectangle.y;
     }
 }

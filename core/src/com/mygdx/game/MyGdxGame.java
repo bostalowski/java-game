@@ -106,6 +106,10 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 		for(Plateform plateform : this.plateformList) {
 			Rectangle plateformRectangle = plateform.getRectangle(this.rectanglePool.obtain());
 
+			if(tenguRectangle.getY() == plateformRectangle.getY() + plateformRectangle.getHeight()) {
+				isTenguOnGround = true;
+			}
+
 			if(tenguRectangle.overlaps(plateformRectangle)) {
 				boolean resetX = false,
 						resetY = false;

@@ -20,20 +20,16 @@ public class CharacterDoubleJumpAnimation extends CharacterAnimation
         super.create(SPRITE_FILENAME, FRAME_COLS, FRAME_ROWS, ANIMATION_DURATION);
     }
 
-    public void resize(int width, int height) {}
-
     public void update()
     {
         super.update(false);
     }
 
-    @Override
     public void render()
     {
         super.render();
     }
 
-    @Override
     public boolean isAnimationFinished()
     {
         return animation.isAnimationFinished(elapsedTime);

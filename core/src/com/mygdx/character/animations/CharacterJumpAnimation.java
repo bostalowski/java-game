@@ -6,10 +6,10 @@ import com.mygdx.character.Tengu;
 
 public class CharacterJumpAnimation extends CharacterAnimation
 {
-    public static final int FRAME_COLS = 9;
+    public static final int FRAME_COLS = 6;
     public static final int FRAME_ROWS = 1;
     public static final String SPRITE_FILENAME = "spritesheet_tengu_jump.png";
-    public static final float ANIMATION_DURATION = 0.6f;
+    public static final float ANIMATION_DURATION = 0.8f;
 
     public CharacterJumpAnimation(Tengu tengu)
     {
@@ -22,20 +22,16 @@ public class CharacterJumpAnimation extends CharacterAnimation
         super.create(SPRITE_FILENAME, FRAME_COLS, FRAME_ROWS, ANIMATION_DURATION);
     }
 
-    public void resize(int width, int height) {}
-
     public void update()
     {
         super.update(false);
     }
 
-    @Override
     public void render()
     {
         super.render();
     }
 
-    @Override
     public boolean isAnimationFinished()
     {
         return animation.isAnimationFinished(elapsedTime);

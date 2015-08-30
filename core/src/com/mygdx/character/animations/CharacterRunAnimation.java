@@ -4,7 +4,7 @@ import com.badlogic.gdx.ApplicationListener;
 import com.mygdx.character.Tengu;
 
 
-public class CharacterRunAnimation extends CharacterAnimation implements ApplicationListener
+public class CharacterRunAnimation extends CharacterAnimation
 {
     public static final int FRAME_COLS = 6;
     public static final int FRAME_ROWS = 1;
@@ -17,38 +17,22 @@ public class CharacterRunAnimation extends CharacterAnimation implements Applica
         this.create();
     }
 
-    @Override
     public void create()
     {
         super.create(SPRITE_FILENAME, FRAME_COLS, FRAME_ROWS, ANIMATION_DURATION);
     }
 
-    @Override
-    public void resize(int width, int height) {}
-
-    @Override
     public void update()
     {
         this.setAnimationDuration(Tengu.SPEED_RUN_MAX_VELOCITY - Math.round(Math.abs(this.tengu.getVelocity().x)) + ANIMATION_DURATION, FRAME_COLS, FRAME_ROWS);
         super.update(true);
     }
 
-    @Override
     public void render()
     {
         super.render();
     }
 
-    @Override
-    public void pause() {}
-
-    @Override
-    public void resume() {}
-
-    @Override
-    public void dispose() {}
-
-    @Override
     public boolean isAnimationFinished() {
         return false;
     }
