@@ -7,7 +7,7 @@ public class CharacterDoubleJumpAnimation extends CharacterAnimation
     public static final int FRAME_COLS = 8;
     public static final int FRAME_ROWS = 1;
     public static final String SPRITE_FILENAME = "spritesheet_tengu_doublejump.png";
-    public static final float ANIMATION_DURATION = 0.6f;
+    public static final float ANIMATION_DURATION = 0.4f;
 
     public CharacterDoubleJumpAnimation(Tengu tengu)
     {

@@ -53,7 +53,7 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 		this.tengu = new Tengu(new Vector2(0, 20), 0, 0);
         this.gravity.addGravityAffectedElement(this.tengu);
 
-		this.plateformList = new ArrayList<>();
+		this.plateformList = new ArrayList();
 		plateformList.add(new Plateform(0, -100, Gdx.graphics.getWidth()*10, 110));
 		plateformList.add(new Plateform(300, 250, 200, 100));
 	}
@@ -89,7 +89,10 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 		Gdx.gl.glClearColor(1, 1, 1, 1);
 
 		//plateforms
-		this.plateformList.forEach(com.mygdx.environment.Plateform::render);
+		for(int i=0; i<this.plateformList.size(); i++) {
+			plateformList.get(i).render();
+		}
+		//this.plateformList.forEach(com.mygdx.environment.Plateform::render);
 
 		this.tengu.render();
 	}
