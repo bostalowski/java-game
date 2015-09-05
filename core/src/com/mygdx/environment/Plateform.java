@@ -2,6 +2,7 @@ package com.mygdx.environment;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
@@ -37,5 +38,10 @@ public class Plateform
     public Rectangle getRectangle(Rectangle rectangle)
     {
         return rectangle.setX(this.position.x).setY(this.position.y).setWidth(this.width).setHeight(this.height);
+    }
+
+    public void setProjectionMatrix(Matrix4 matrix)
+    {
+        this.shapeRenderer.setProjectionMatrix(matrix);
     }
 }

@@ -1,6 +1,7 @@
 package com.mygdx.character;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.character.animations.*;
@@ -273,5 +274,10 @@ public class Tengu extends Physics
     public Rectangle getRectangle(Rectangle rectangle)
     {
         return rectangle.setX(this.position.x).setY(this.position.y).setWidth(this.getWidth()).setHeight(this.getHeight());
+    }
+
+    public SpriteBatch getSpriteBatch()
+    {
+        return this.currentAnimation.getSpriteBatch();
     }
 }

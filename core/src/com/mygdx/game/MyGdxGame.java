@@ -9,6 +9,7 @@ import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.controllers.PovDirection;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -23,10 +24,10 @@ import java.util.ArrayList;
 
 public class MyGdxGame extends ApplicationAdapter implements ControllerListener, InputProcessor {
 
+	private Controller controller;
+	private OrthographicCamera camera;
     private Gravity gravity;
 	private Tengu tengu;
-
-	Controller controller;
 
 	private Pool<Rectangle> rectanglePool = new Pool<Rectangle>() {
 		@Override
@@ -48,6 +49,11 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 			this.controller = Controllers.getControllers().first();
 		}
 
+		this.camera = new OrthographicCamera(1280, 720);
+		this.camera.setToOrtho(false, 1280, 720);
+		this.camera.position.set(0, 720f / 2f, 0);
+		this.camera.update();
+
 		this.gravity = new Gravity();
 
 		this.tengu = new Tengu(new Vector2(0, 20), 0, 0);
@@ -55,7 +61,9 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 
 		this.plateformList = new ArrayList();
 		plateformList.add(new Plateform(0, -100, Gdx.graphics.getWidth()*10, 110));
-		plateformList.add(new Plateform(300, 250, 200, 100));
+		for(int i=0; i<20; i++) {
+			plateformList.add(new Plateform(i*800, (float)(Math.random() * ( 500 - 100 )), (float)(Math.random() * ( 500 - 100 )), (float)(Math.random() * ( 500 - 100 ))));
+		}
 	}
 
 	public void update(float deltaTime)
@@ -81,15 +89,26 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 
 	@Override
 	public void render () {
-        float deltaTime = Gdx.graphics.getDeltaTime() * 10;
-        
+		float deltaTime = Gdx.graphics.getDeltaTime() * 10;
 		update(deltaTime);
 
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-		Gdx.gl.glClearColor(1, 1, 1, 1);
+		//this.camera.position.set(this.tengu.getPosition().x, this.tengu.getPosition().y, 0);
+		//this.tengu.getSpriteBatch().setProjectionMatrix(this.camera.combined);
+
+		GL20 gl20 = Gdx.graphics.getGL20();
+		gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		gl20.glClearColor(1, 1, 1, 1);
+//		gl20.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+		this.camera.position.set(this.tengu.getPosition().x, this.camera.position.y, 0);
+		this.camera.update();
+		this.tengu.getSpriteBatch().setProjectionMatrix(this.camera.combined);
+
+		//TODO set projection matrix on rectangle ?
 
 		//plateforms
 		for(int i=0; i<this.plateformList.size(); i++) {
+			plateformList.get(i).setProjectionMatrix(this.camera.combined);
 			plateformList.get(i).render();
 		}
 		//this.plateformList.forEach(com.mygdx.environment.Plateform::render);
@@ -109,7 +128,14 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 		for(Plateform plateform : this.plateformList) {
 			Rectangle plateformRectangle = plateform.getRectangle(this.rectanglePool.obtain());
 
-			if(tenguRectangle.getY() == plateformRectangle.getY() + plateformRectangle.getHeight()) {
+			if(
+				tenguRectangle.getY() == plateformRectangle.getY() + plateformRectangle.getHeight()
+				/*&&
+					(tenguRectangle.getX() >= plateformRectangle.getX()
+					||
+					tenguRectangle.getX() + tenguRectangle.getWidth() <= plateformRectangle.getX() + plateformRectangle.getWidth())*/
+			)
+			{
 				isTenguOnGround = true;
 			}
 
