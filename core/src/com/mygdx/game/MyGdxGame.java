@@ -62,7 +62,7 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 		this.plateformList = new ArrayList();
 		plateformList.add(new Plateform(0, -100, Gdx.graphics.getWidth()*10, 110));
 		for(int i=0; i<20; i++) {
-			plateformList.add(new Plateform(i*800, (float)(Math.random() * ( 500 - 100 )), (float)(Math.random() * ( 500 - 100 )), (float)(Math.random() * ( 500 - 100 ))));
+			plateformList.add(new Plateform((i + 1)*800, (float)(Math.random() * ( 500 - 100 )), (float)(Math.random() * ( 500 - 100 )), (float)(Math.random() * ( 500 - 100 ))));
 		}
 	}
 
