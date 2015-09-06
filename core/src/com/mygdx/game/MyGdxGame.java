@@ -61,8 +61,8 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 
 		this.plateformList = new ArrayList();
 		plateformList.add(new Plateform(0, -100, Gdx.graphics.getWidth() * 10, 110));
-		for(int i=0; i<20; i++) {
-			plateformList.add(new Plateform((i + 1)*800, (float)(Math.random() * ( 500 - 100 )), (float)(Math.random() * ( 500 - 100 )), (float)(Math.random() * ( 500 - 100 ))));
+		for(int i=0; i<50; i++) {
+			plateformList.add(new Plateform((i + 1)*800, (float)Math.round(Math.random() * (500 - 100)), (float)Math.round(Math.random() * (500 - 100)), (float)Math.round(Math.random() * ( 500 - 100 ))));
 		}
 	}
 
@@ -91,10 +91,11 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 		float deltaTime = Gdx.graphics.getDeltaTime() * 10;
 		update(deltaTime);
 
+		//System.out.println(this.tengu.getPosition().y);
+
 		GL20 gl20 = Gdx.graphics.getGL20();
 		gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		gl20.glClearColor(1, 1, 1, 1);
-//		gl20.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
 		this.camera.position.set(this.tengu.getPosition().x, this.camera.position.y, 0);
 		this.camera.update();
@@ -107,7 +108,6 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 			plateformList.get(i).setProjectionMatrix(this.camera.combined);
 			plateformList.get(i).render();
 		}
-		//this.plateformList.forEach(com.mygdx.environment.Plateform::render);
 
 		this.tengu.render();
 	}
@@ -130,7 +130,7 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 			Rectangle plateformRectangle = plateform.getRectangle(this.rectanglePool.obtain());
 
 			if(
-				((tenguRectangle.getX() >= plateformRectangle.getX()) && (tenguRectangle.getX() + tenguRectangle.getWidth() <= plateformRectangle.getX() + plateformRectangle.getWidth()))
+				((tenguRectangle.getX() + tenguRectangle.getWidth() >= plateformRectangle.getX()) && (tenguRectangle.getX() <= plateformRectangle.getX() + plateformRectangle.getWidth()))
 				&&
 				((oldTenguPosition.y >= plateformRectangle.getY() + plateformRectangle.getHeight()) && (tenguRectangle.getY() <= plateformRectangle.getY() + plateformRectangle.getHeight()))
 			)
@@ -159,7 +159,8 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 					this.tengu.applyForce(new Vector2(0, velocityY));
 					resetY = true;
 				} else if(this.tengu.getVelocity().y < 0 && isTenguOverPlateform) {
-					float velocityY = (plateformRectangle.getY() + plateformRectangle.getHeight()) - tenguRectangle.getY() - this.tengu.getVelocity().y;
+					//add 0.2f to avoid float to be reversed
+					float velocityY = (plateformRectangle.getY() + plateformRectangle.getHeight() + 0.1f) - tenguRectangle.getY() - this.tengu.getVelocity().y;
 					this.tengu.applyForce(new Vector2(0, velocityY));
 					resetY = true;
 					isTenguOnGround = true;
@@ -171,7 +172,6 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 
 		this.tengu.getPosition().add(this.tengu.getVelocity());
 		this.tengu.setVelocity(new Vector2(resetX ? 0 : this.tengu.getVelocity().x, resetY ? 0 : this.tengu.getVelocity().y));
-
 		this.tengu.setIsOnGround(isTenguOnGround);
 
 		this.rectanglePool.free(tenguRectangle);

@@ -1,6 +1,5 @@
 package com.mygdx.character;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -21,8 +20,8 @@ public class Tengu extends Physics
     public static final float SPEED_JUMP_ACCELERATION = 20f;
     public static final float SPEED_DASH_ACCELERATION = 20f;
 
-    public static final float FRICTION_ON_AIR = 0;
-    public static final float FRICTION_ON_GROUND = 1f;
+    public static final float FRICTION_ON_AIR = 0.4f;
+    public static final float FRICTION_ON_GROUND = 0.8f;
     public static final float FRICTION_ON_PARACHUTE = 1f;
 
     private static final float DIRECTION_LEFT = -1;
@@ -83,9 +82,13 @@ public class Tengu extends Physics
     public void update(float deltaTime)
     {
         if(this.isOnGround) {
-            this.friction = new Vector2(FRICTION_ON_GROUND, 0);
+            //if just landed, no inertia
+            if(this.isJumping) {
+                this.velocity = new Vector2(0, this.velocity.y);
+            }
             this.isJumping = false;
             this.hasDoubleJumped = false;
+            this.friction = new Vector2(FRICTION_ON_GROUND, 0);
         } else {
             this.friction = new Vector2(FRICTION_ON_AIR, 0);
             //is falling ?
@@ -116,14 +119,17 @@ public class Tengu extends Physics
             this.velocity = new Vector2(0, 0);
         }
 
+        //round velocity
+        this.velocity = new Vector2(Math.round(this.velocity.x * 100)/100f, Math.round(this.velocity.y * 100)/100f);
         this.position.add(this.velocity);
 
         if(!this.isAnyKeyPressed && !this.isJumping) {
             if(Math.abs(this.velocity.x) > 2) {
                 changeAnimation(ACTION_SLIDE);
             }
+
             if(Math.round(this.velocity.x * 100) == 0) {
-                this.velocity.x = 0;
+                this.velocity = new Vector2(0, this.velocity.y);
                 changeAnimation(ACTION_STANCE);
             }
         }
