@@ -60,7 +60,7 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
         this.gravity.addGravityAffectedElement(this.tengu);
 
 		this.plateformList = new ArrayList();
-		plateformList.add(new Plateform(0, -100, Gdx.graphics.getWidth()*10, 110));
+		plateformList.add(new Plateform(0, -100, Gdx.graphics.getWidth() * 10, 110));
 		for(int i=0; i<20; i++) {
 			plateformList.add(new Plateform((i + 1)*800, (float)(Math.random() * ( 500 - 100 )), (float)(Math.random() * ( 500 - 100 )), (float)(Math.random() * ( 500 - 100 ))));
 		}
@@ -68,8 +68,6 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 
 	public void update(float deltaTime)
 	{
-		Vector2 oldTenguPosition = new Vector2(this.tengu.getPosition().x, this.tengu.getPosition().y);
-
 		//apply gravity
 		this.gravity.applyGravity();
 
@@ -77,10 +75,11 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 		this.handleKeyboard();
 		this.handleController();
 
-		//this.tengu.handleKeys();
 		this.tengu.update(deltaTime);
 
-		this.handleCollisions(oldTenguPosition);
+		this.handleCollisions();
+
+		this.tengu.setOldPosition(this.tengu.getPosition()).setOldVelocity(this.tengu.getVelocity());
 
 		//add delta time to position ?
 		//System.out.println((oldTenguPosition.x - this.tengu.getPosition().x) * deltaTime * 10);
@@ -91,9 +90,6 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 	public void render () {
 		float deltaTime = Gdx.graphics.getDeltaTime() * 10;
 		update(deltaTime);
-
-		//this.camera.position.set(this.tengu.getPosition().x, this.tengu.getPosition().y, 0);
-		//this.tengu.getSpriteBatch().setProjectionMatrix(this.camera.combined);
 
 		GL20 gl20 = Gdx.graphics.getGL20();
 		gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -119,37 +115,37 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 	@Override
 	public void dispose() {}
 
-	public void handleCollisions(Vector2 oldTenguPosition)
+	public void handleCollisions()
 	{
+		Vector2 oldTenguPosition = this.tengu.getOldPosition().sub(this.tengu.getOldVelocity());
+
 		Rectangle tenguRectangle = this.tengu.getRectangle(this.rectanglePool.obtain());
 
 		boolean isTenguOnGround = false;
+
+		boolean resetX = false,
+				resetY = false;
 
 		for(Plateform plateform : this.plateformList) {
 			Rectangle plateformRectangle = plateform.getRectangle(this.rectanglePool.obtain());
 
 			if(
-				tenguRectangle.getY() == plateformRectangle.getY() + plateformRectangle.getHeight()
-				/*&&
-					(tenguRectangle.getX() >= plateformRectangle.getX()
-					||
-					tenguRectangle.getX() + tenguRectangle.getWidth() <= plateformRectangle.getX() + plateformRectangle.getWidth())*/
+				((tenguRectangle.getX() >= plateformRectangle.getX()) && (tenguRectangle.getX() + tenguRectangle.getWidth() <= plateformRectangle.getX() + plateformRectangle.getWidth()))
+				&&
+				((oldTenguPosition.y >= plateformRectangle.getY() + plateformRectangle.getHeight()) && (tenguRectangle.getY() <= plateformRectangle.getY() + plateformRectangle.getHeight()))
 			)
 			{
 				isTenguOnGround = true;
 			}
 
 			if(tenguRectangle.overlaps(plateformRectangle)) {
-				boolean resetX = false,
-						resetY = false;
-
 				boolean isTenguOverPlateform = plateformRectangle.getY() + plateformRectangle.getHeight() <= oldTenguPosition.y;
 				boolean isTenguUnderPlateform = plateformRectangle.getY() >= oldTenguPosition.y + tenguRectangle.getHeight();
 				boolean isTenguOnLeftOrRight = plateformRectangle.getX() >= oldTenguPosition.x + tenguRectangle.getWidth() ||
 						plateformRectangle.getX() + plateformRectangle.getWidth() <= oldTenguPosition.x;
 
 				if(this.tengu.getVelocity().x > 0 && !isTenguOverPlateform && isTenguOnLeftOrRight) {
-					float velocityX = plateformRectangle.getX() - (tenguRectangle.getX() + tenguRectangle.getWidth()) - this.tengu.getVelocity().x;
+					float velocityX = plateformRectangle.getX() - (tenguRectangle.getX() + tenguRectangle.getWidth() + this.tengu.getVelocity().x);
 					this.tengu.applyForce(new Vector2(velocityX, 0));
 					resetX = true;
 				} else if(this.tengu.getVelocity().x < 0 && !isTenguOverPlateform && isTenguOnLeftOrRight) {
@@ -168,13 +164,13 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 					resetY = true;
 					isTenguOnGround = true;
 				}
-
-				this.tengu.getPosition().add(this.tengu.getVelocity());
-				this.tengu.setVelocity(new Vector2(resetX ? 0 : this.tengu.getVelocity().x, resetY ? 0 : this.tengu.getVelocity().y));
 			}
 
 			this.rectanglePool.free(plateformRectangle);
 		}
+
+		this.tengu.getPosition().add(this.tengu.getVelocity());
+		this.tengu.setVelocity(new Vector2(resetX ? 0 : this.tengu.getVelocity().x, resetY ? 0 : this.tengu.getVelocity().y));
 
 		this.tengu.setIsOnGround(isTenguOnGround);
 
@@ -196,6 +192,11 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 		//PARACHUTE
 		if(Gdx.input.isKeyPressed(Input.Keys.UP)) {
 			this.tengu.deployParachute();
+		}
+
+		//DEBUG
+		if(Gdx.input.isKeyPressed(Input.Keys.TAB)) {
+			int debug = 1;
 		}
 	}
 

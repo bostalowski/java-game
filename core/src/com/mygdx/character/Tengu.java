@@ -38,7 +38,7 @@ public class Tengu extends Physics
     private CharacterAnimation characterFallAnimation;
     private CharacterAnimation characterSlideAnimation;
 
-    private boolean isOnGround,
+    public boolean isOnGround,
             isJumping,
             hasDoubleJumped,
             isDashingLeft,
@@ -48,12 +48,17 @@ public class Tengu extends Physics
     public static final float DASH_MAX_DISTANCE = 300f;
     private float elapsedDashDistance;
 
+    private Vector2 oldPosition,
+            oldVelocity;
+
     public Tengu(Vector2 position, float speed, float direction)
     {
         this.position = position;
+        this.oldPosition = new Vector2(position.x, position.y);
         this.velocity = new Vector2(0, 0);
         this.velocity.setLength(speed);
         this.velocity.setAngle(direction);
+        this.oldVelocity = new Vector2(this.velocity.x, this.velocity.y);
         this.friction = new Vector2(0, 0);
         this.direction = DIRECTION_RIGHT;
         this.isOnGround = true;
@@ -77,7 +82,7 @@ public class Tengu extends Physics
 
     public void update(float deltaTime)
     {
-        if(isOnGround) {
+        if(this.isOnGround) {
             this.friction = new Vector2(FRICTION_ON_GROUND, 0);
             this.isJumping = false;
             this.hasDoubleJumped = false;
@@ -112,12 +117,6 @@ public class Tengu extends Physics
         }
 
         this.position.add(this.velocity);
-
-//        if(position.x > Gdx.graphics.getWidth()) {
-//            position.x = 0;
-//        } else if (position.x < 0) {
-//            position.x = Gdx.graphics.getWidth();
-//        }
 
         if(!this.isAnyKeyPressed && !this.isJumping) {
             if(Math.abs(this.velocity.x) > 2) {
@@ -279,5 +278,27 @@ public class Tengu extends Physics
     public SpriteBatch getSpriteBatch()
     {
         return this.currentAnimation.getSpriteBatch();
+    }
+
+    public Vector2 getOldPosition()
+    {
+        return this.oldPosition;
+    }
+
+    public Tengu setOldPosition(Vector2 oldPosition)
+    {
+        this.oldPosition = new Vector2(oldPosition.x, oldPosition.y);
+        return this;
+    }
+
+    public Vector2 getOldVelocity()
+    {
+        return this.oldVelocity;
+    }
+
+    public Tengu setOldVelocity(Vector2 oldVelocity)
+    {
+        this.oldVelocity = new Vector2(oldVelocity.x, oldVelocity.y);
+        return this;
     }
 }
