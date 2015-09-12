@@ -49,9 +49,9 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 			this.controller = Controllers.getControllers().first();
 		}
 
-		this.camera = new OrthographicCamera(1280, 720);
-		this.camera.setToOrtho(false, 1280, 720);
-		this.camera.position.set(0, 720f / 2f, 0);
+		this.camera = new OrthographicCamera(1920, 1080);
+		this.camera.setToOrtho(false, 1920, 1080);
+		this.camera.position.set(0, 1080f / 2f, 0);
 		this.camera.update();
 
 		this.gravity = new Gravity();
@@ -62,9 +62,9 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 		this.plateformList = new ArrayList();
 		plateformList.add(new Plateform(0, -100, Gdx.graphics.getWidth() * 10, 110));
 		for(int i=0; i<50; i++) {
-			//plateformList.add(new Plateform((i + 1)*800, (float)Math.round(Math.random() * (500 - 100)), (float)Math.round(Math.random() * (500 - 100)), (float)Math.round(Math.random() * ( 500 - 100 ))));
+			plateformList.add(new Plateform((i + 1)*800, (float)Math.round(Math.random() * (500 - 100)), (float)Math.round(Math.random() * (500 - 100)), (float)Math.round(Math.random() * ( 500 - 100 ))));
 		}
-		plateformList.add(new Plateform(500, 100, 200, 200));
+		//plateformList.add(new Plateform(500, 100, 200, 200));
 	}
 
 	public void update(float deltaTime)
