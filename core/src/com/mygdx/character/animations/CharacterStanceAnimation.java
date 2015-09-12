@@ -12,7 +12,7 @@ public class CharacterStanceAnimation extends CharacterAnimation
 
     public CharacterStanceAnimation(Tengu tengu)
     {
-        super(175, 175, tengu);
+        super(119, 133, tengu);
         this.create();
     }
 

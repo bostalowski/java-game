@@ -11,7 +11,7 @@ public class CharacterDoubleJumpAnimation extends CharacterAnimation
 
     public CharacterDoubleJumpAnimation(Tengu tengu)
     {
-        super(175, 175, tengu);
+        super(136, 123, tengu);
         this.create();
     }
 

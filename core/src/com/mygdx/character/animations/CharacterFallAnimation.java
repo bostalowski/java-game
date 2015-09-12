@@ -11,7 +11,7 @@ public class CharacterFallAnimation extends CharacterAnimation
 
     public CharacterFallAnimation(Tengu tengu)
     {
-        super(175, 175, tengu);
+        super(130, 134, tengu);
         this.create();
     }
 

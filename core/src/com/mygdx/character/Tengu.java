@@ -14,11 +14,14 @@ public class Tengu extends Physics
     private static final int ACTION_DOUBLE_JUMP = 3;
     private static final int ACTION_FALL = 4;
     private static final int ACTION_SLIDE = 5;
+    private static final int ACTION_WALK = 6;
 
     public static final float SPEED_RUN_MAX_VELOCITY = 10f;
-    public static final float SPEED_RUN_ACCELERATION = 5f;
+    public static final float SPEED_RUN_ACCELERATION = 2f;
     public static final float SPEED_JUMP_ACCELERATION = 20f;
     public static final float SPEED_DASH_ACCELERATION = 20f;
+    public static final float SPEED_WALK_ACCELERATION = 1f;
+    public static final float SPEED_WALK_MAX_VELOCITY = 5f;
 
     public static final float FRICTION_ON_AIR = 0.4f;
     public static final float FRICTION_ON_GROUND = 0.8f;
@@ -36,6 +39,7 @@ public class Tengu extends Physics
     private CharacterAnimation characterDoubleJumpAnimation;
     private CharacterAnimation characterFallAnimation;
     private CharacterAnimation characterSlideAnimation;
+    private CharacterAnimation characterWalkAnimation;
 
     public boolean isOnGround,
             isJumping,
@@ -74,6 +78,7 @@ public class Tengu extends Physics
         this.characterDoubleJumpAnimation = new CharacterDoubleJumpAnimation(this);
         this.characterFallAnimation = new CharacterFallAnimation(this);
         this.characterSlideAnimation = new CharacterSlideAnimation(this);
+        this.characterWalkAnimation = new CharacterWalkAnimation(this);
 
         this.currentAction = ACTION_STANCE;
         this.currentAnimation = this.characterStanceAnimation;
@@ -84,7 +89,7 @@ public class Tengu extends Physics
         if(this.isOnGround) {
             //if just landed, no inertia
             if(this.isJumping) {
-                this.velocity = new Vector2(0, this.velocity.y);
+                //this.velocity = new Vector2(0, this.velocity.y);
             }
             this.isJumping = false;
             this.hasDoubleJumped = false;
@@ -163,37 +168,61 @@ public class Tengu extends Physics
 
     public void moveLeft()
     {
-        if(this.velocity.x > -SPEED_RUN_MAX_VELOCITY) {
-            if(this.velocity.x - SPEED_RUN_ACCELERATION < -SPEED_RUN_MAX_VELOCITY) {
-                Vector2 force = new Vector2(-(SPEED_RUN_MAX_VELOCITY + this.velocity.x), 0);
-                this.applyForce(force);
-            } else {
-                Vector2 force = new Vector2(-SPEED_RUN_ACCELERATION, 0);
-                this.applyForce(force);
+        int action;
+
+        if(this.velocity.x > -SPEED_WALK_MAX_VELOCITY || (this.currentAction == ACTION_WALK && !this.currentAnimation.isAnimationFinished())) {
+            action = ACTION_WALK;
+
+            Vector2 force = new Vector2(-SPEED_WALK_ACCELERATION, 0);
+            this.applyForce(force);
+        } else {
+            action = ACTION_RUN;
+
+            if(this.velocity.x > -SPEED_RUN_MAX_VELOCITY) {
+                if(this.velocity.x - SPEED_RUN_ACCELERATION < -SPEED_RUN_MAX_VELOCITY) {
+                    Vector2 force = new Vector2(-(SPEED_RUN_MAX_VELOCITY + this.velocity.x), 0);
+                    this.applyForce(force);
+                } else {
+                    Vector2 force = new Vector2(-SPEED_RUN_ACCELERATION, 0);
+                    this.applyForce(force);
+                }
             }
         }
+
         this.isAnyKeyPressed = true;
         this.direction = DIRECTION_LEFT;
-        if(!isJumping) {
-            this.changeAnimation(ACTION_RUN);
+        if(!this.isJumping) {
+            changeAnimation(action);
         }
     }
 
     public void moveRight()
     {
-        if(this.velocity.x < SPEED_RUN_MAX_VELOCITY) {
-            if(this.velocity.x + SPEED_RUN_ACCELERATION > SPEED_RUN_MAX_VELOCITY) {
-                Vector2 force = new Vector2(SPEED_RUN_MAX_VELOCITY - this.velocity.x, 0);
-                this.applyForce(force);
-            } else {
-                Vector2 force = new Vector2(SPEED_RUN_ACCELERATION, 0);
-                this.applyForce(force);
+        int action;
+
+        if(this.velocity.x < SPEED_WALK_MAX_VELOCITY || (this.currentAction == ACTION_WALK && !this.currentAnimation.isAnimationFinished())) {
+            action = ACTION_WALK;
+
+            Vector2 force = new Vector2(SPEED_WALK_ACCELERATION, 0);
+            this.applyForce(force);
+        } else {
+            action = ACTION_RUN;
+
+            if(this.velocity.x < SPEED_RUN_MAX_VELOCITY) {
+                if(this.velocity.x + SPEED_RUN_ACCELERATION > SPEED_RUN_MAX_VELOCITY) {
+                    Vector2 force = new Vector2(SPEED_RUN_MAX_VELOCITY - this.velocity.x, 0);
+                    this.applyForce(force);
+                } else {
+                    Vector2 force = new Vector2(SPEED_RUN_ACCELERATION, 0);
+                    this.applyForce(force);
+                }
             }
         }
+
         this.isAnyKeyPressed = true;
         this.direction = DIRECTION_RIGHT;
         if(!isJumping) {
-            this.changeAnimation(ACTION_RUN);
+            this.changeAnimation(action);
         }
     }
 
@@ -244,6 +273,9 @@ public class Tengu extends Physics
                 case ACTION_SLIDE:
                     this.currentAnimation = this.characterSlideAnimation;
                     break;
+                case ACTION_WALK:
+                    this.currentAnimation = this.characterWalkAnimation;
+                    break;
                 default:
                     this.currentAnimation = this.characterStanceAnimation;
             }
@@ -262,7 +294,8 @@ public class Tengu extends Physics
 
     public float getWidth()
     {
-        return this.currentAnimation.getWidth();
+        //return this.currentAnimation.getWidth();
+        return 130;
     }
 
     public float getHeight()

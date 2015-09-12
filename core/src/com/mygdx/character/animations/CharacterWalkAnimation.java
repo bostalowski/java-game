@@ -1,19 +1,17 @@
 package com.mygdx.character.animations;
 
-import com.badlogic.gdx.ApplicationListener;
-import com.badlogic.gdx.math.Vector2;
 import com.mygdx.character.Tengu;
 
-public class CharacterJumpAnimation extends CharacterAnimation
+public class CharacterWalkAnimation extends CharacterAnimation
 {
     public static final int FRAME_COLS = 6;
     public static final int FRAME_ROWS = 1;
-    public static final String SPRITE_FILENAME = "spritesheet_tengu_jump.png";
-    public static final float ANIMATION_DURATION = 0.8f;
+    public static final String SPRITE_FILENAME = "spritesheet_tengu_walk.png";
+    public static final float ANIMATION_DURATION = 0.5f;
 
-    public CharacterJumpAnimation(Tengu tengu)
+    public CharacterWalkAnimation(Tengu tengu)
     {
-        super(126, 137, tengu);
+        super(118, 133, tengu);
         this.create();
     }
 
@@ -22,16 +20,13 @@ public class CharacterJumpAnimation extends CharacterAnimation
         super.create(SPRITE_FILENAME, FRAME_COLS, FRAME_ROWS, ANIMATION_DURATION);
     }
 
+    @Override
     public void update()
     {
-        super.update(false);
+        this.update(false);
     }
 
-    public void render()
-    {
-        super.render();
-    }
-
+    @Override
     public boolean isAnimationFinished()
     {
         return animation.isAnimationFinished(elapsedTime);

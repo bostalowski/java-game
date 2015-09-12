@@ -62,8 +62,9 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 		this.plateformList = new ArrayList();
 		plateformList.add(new Plateform(0, -100, Gdx.graphics.getWidth() * 10, 110));
 		for(int i=0; i<50; i++) {
-			plateformList.add(new Plateform((i + 1)*800, (float)Math.round(Math.random() * (500 - 100)), (float)Math.round(Math.random() * (500 - 100)), (float)Math.round(Math.random() * ( 500 - 100 ))));
+			//plateformList.add(new Plateform((i + 1)*800, (float)Math.round(Math.random() * (500 - 100)), (float)Math.round(Math.random() * (500 - 100)), (float)Math.round(Math.random() * ( 500 - 100 ))));
 		}
+		plateformList.add(new Plateform(500, 100, 200, 200));
 	}
 
 	public void update(float deltaTime)
@@ -141,25 +142,25 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 			if(tenguRectangle.overlaps(plateformRectangle)) {
 				boolean isTenguOverPlateform = plateformRectangle.getY() + plateformRectangle.getHeight() <= oldTenguPosition.y;
 				boolean isTenguUnderPlateform = plateformRectangle.getY() >= oldTenguPosition.y + tenguRectangle.getHeight();
-				boolean isTenguOnLeftOrRight = plateformRectangle.getX() >= oldTenguPosition.x + tenguRectangle.getWidth() ||
-						plateformRectangle.getX() + plateformRectangle.getWidth() <= oldTenguPosition.x;
-
-				if(this.tengu.getVelocity().x > 0 && !isTenguOverPlateform && isTenguOnLeftOrRight) {
-					float velocityX = plateformRectangle.getX() - (tenguRectangle.getX() + tenguRectangle.getWidth() + this.tengu.getVelocity().x);
+				boolean isTenguOnLeft = plateformRectangle.getX() >= oldTenguPosition.x + tenguRectangle.getWidth();
+				boolean isTenguOnRight = plateformRectangle.getX() + plateformRectangle.getWidth() <= oldTenguPosition.x;
+				
+				if(this.tengu.getVelocity().x >= 0 && !isTenguOverPlateform && isTenguOnLeft) {
+					float velocityX = (plateformRectangle.getX() - 0.1f) - (tenguRectangle.getX() + tenguRectangle.getWidth() + this.tengu.getVelocity().x);
 					this.tengu.applyForce(new Vector2(velocityX, 0));
 					resetX = true;
-				} else if(this.tengu.getVelocity().x < 0 && !isTenguOverPlateform && isTenguOnLeftOrRight) {
-					float velocityX = (plateformRectangle.getX() + plateformRectangle.getWidth()) - tenguRectangle.getX() - this.tengu.getVelocity().x;
+				} else if(this.tengu.getVelocity().x <= 0 && !isTenguOverPlateform && isTenguOnRight) {
+					float velocityX = (plateformRectangle.getX() + plateformRectangle.getWidth() + 0.1f) - (tenguRectangle.getX() + this.tengu.getVelocity().x);
 					this.tengu.applyForce(new Vector2(velocityX, 0));
 					resetX = true;
 				}
 
 				if(this.tengu.getVelocity().y > 0 && isTenguUnderPlateform) {
-					float velocityY = plateformRectangle.getY() - (tenguRectangle.getY() + tenguRectangle.getHeight()) - this.tengu.getVelocity().y;
+					float velocityY = (plateformRectangle.getY() - 0.1f) - (tenguRectangle.getY() + tenguRectangle.getHeight()) - this.tengu.getVelocity().y;
 					this.tengu.applyForce(new Vector2(0, velocityY));
 					resetY = true;
 				} else if(this.tengu.getVelocity().y < 0 && isTenguOverPlateform) {
-					//add 0.2f to avoid float to be reversed
+					//add 0.1f to avoid float to be reversed
 					float velocityY = (plateformRectangle.getY() + plateformRectangle.getHeight() + 0.1f) - tenguRectangle.getY() - this.tengu.getVelocity().y;
 					this.tengu.applyForce(new Vector2(0, velocityY));
 					resetY = true;

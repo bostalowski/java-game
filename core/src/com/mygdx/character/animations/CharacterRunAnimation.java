@@ -13,7 +13,7 @@ public class CharacterRunAnimation extends CharacterAnimation
 
     public CharacterRunAnimation(Tengu tengu)
     {
-        super(175, 175, tengu);
+        super(128, 133, tengu);
         this.create();
     }
 
