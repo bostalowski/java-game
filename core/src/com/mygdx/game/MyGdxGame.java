@@ -37,9 +37,9 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 		}
 	};
 
-	Array<Platform> platformList;
-    Array<BaseEffectAnimation> backgroundEffects;
-    Array<BaseEffectAnimation> foregroundEffects;
+	Array platformList;
+    Array backgroundEffects;
+    Array foregroundEffects;
 
 	@Override
 	public void create ()
@@ -66,14 +66,14 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 
         this.spriteBatch = new SpriteBatch();
 
-		this.platformList = new Array<>();
-        platformList.add(new Platform(0, -100, Gdx.graphics.getWidth() * 10, 110));
+		this.platformList = new Array();
+        this.platformList.add(new Platform(0, -100, Gdx.graphics.getWidth() * 10, 110));
 		for(int i=0; i<50; i++) {
-            platformList.add(new Platform((i + 1)*800, (float)Math.round(Math.random() * (500 - 100)), (float)Math.round(Math.random() * (500 - 100)), (float)Math.round(Math.random() * ( 500 - 100 ))));
+            this.platformList.add(new Platform((i + 1)*800, (float)Math.round(Math.random() * (500 - 100)), (float)Math.round(Math.random() * (500 - 100)), (float)Math.round(Math.random() * ( 500 - 100 ))));
 		}
 
-        this.backgroundEffects = new Array<>();
-        this.foregroundEffects = new Array<>();
+        this.backgroundEffects = new Array();
+        this.foregroundEffects = new Array();
 	}
 
 	public void update(float deltaTime)
@@ -93,14 +93,16 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 
         //remove background finished animations
         for(int i=0; i<this.backgroundEffects.size; i++) {
-            if(this.backgroundEffects.get(i).isAnimationFinished(deltaTime)) {
+            BaseEffectAnimation baseEffectAnimation = (BaseEffectAnimation) this.backgroundEffects.get(i);
+            if(baseEffectAnimation.isAnimationFinished(deltaTime)) {
                 this.backgroundEffects.removeIndex(i);
             }
         }
 
         //remove foreground finished animations
         for(int i=0; i<this.foregroundEffects.size; i++) {
-            if(this.foregroundEffects.get(i).isAnimationFinished(deltaTime)) {
+            BaseEffectAnimation baseEffectAnimation = (BaseEffectAnimation) this.foregroundEffects.get(i);
+            if(baseEffectAnimation.isAnimationFinished(deltaTime)) {
                 this.foregroundEffects.removeIndex(i);
             }
         }
@@ -125,22 +127,25 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 
 		//platforms
 		for(int i=0; i<this.platformList.size; i++) {
-            platformList.get(i).setProjectionMatrix(this.camera.combined);
-            platformList.get(i).render();
+            Platform platform = (Platform) this.platformList.get(i);
+            platform.setProjectionMatrix(this.camera.combined);
+            platform.render();
 		}
 
         this.spriteBatch.begin();
 
         //display background effects
         for(int i=0; i<this.backgroundEffects.size; i++) {
-            this.backgroundEffects.get(i).render(this.spriteBatch);
+            BaseEffectAnimation baseEffectAnimation = (BaseEffectAnimation) this.backgroundEffects.get(i);
+            baseEffectAnimation.render(this.spriteBatch);
         }
 
 		this.tengu.render(this.spriteBatch);
 
         //display foreground effects
         for(int i=0; i<this.foregroundEffects.size; i++) {
-            this.foregroundEffects.get(i).render(this.spriteBatch);
+            BaseEffectAnimation baseEffectAnimation = (BaseEffectAnimation) this.foregroundEffects.get(i);
+            baseEffectAnimation.render(this.spriteBatch);
         }
 
         this.spriteBatch.end();
@@ -160,7 +165,8 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 		boolean resetX = false,
 				resetY = false;
 
-		for(Platform platform : this.platformList) {
+		for(int i=0; i<this.platformList.size; i++) {
+            Platform platform = (Platform) this.platformList.get(i);
 			Rectangle plateformRectangle = platform.getRectangle(this.rectanglePool.obtain());
 
 			if(
