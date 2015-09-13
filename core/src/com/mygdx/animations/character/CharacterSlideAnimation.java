@@ -1,17 +1,17 @@
-package com.mygdx.character.animations;
+package com.mygdx.animations.character;
 
 import com.mygdx.character.Tengu;
 
-public class CharacterDoubleJumpAnimation extends CharacterAnimation
+public class CharacterSlideAnimation extends AbstractCharacterAnimation
 {
-    public static final int FRAME_COLS = 8;
+    public static final int FRAME_COLS = 3;
     public static final int FRAME_ROWS = 1;
-    public static final String SPRITE_FILENAME = "spritesheet_tengu_doublejump.png";
+    public static final String SPRITE_FILENAME = "sprites/tengu-animations/spritesheet_tengu_slide.png";
     public static final float ANIMATION_DURATION = 0.4f;
 
-    public CharacterDoubleJumpAnimation(Tengu tengu)
+    public CharacterSlideAnimation(Tengu tengu)
     {
-        super(136, 123, tengu);
+        super(124, 130, tengu);
         this.create();
     }
 
@@ -23,11 +23,6 @@ public class CharacterDoubleJumpAnimation extends CharacterAnimation
     public void update()
     {
         super.update(false);
-    }
-
-    public void render()
-    {
-        super.render();
     }
 
     public boolean isAnimationFinished()

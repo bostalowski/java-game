@@ -1,4 +1,4 @@
-package com.mygdx.character.animations;
+package com.mygdx.animations.character;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
@@ -7,12 +7,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.mygdx.character.Tengu;
 
-public abstract class CharacterAnimation
+public abstract class AbstractCharacterAnimation
 {
     protected int frameWidth = 0;
     protected int frameHeight = 0;
 
-    protected SpriteBatch spriteBatch;
     protected Texture texture;
     protected Animation animation;
     protected TextureRegion actualFrame;
@@ -22,7 +21,7 @@ public abstract class CharacterAnimation
 
     protected Tengu tengu;
 
-    public CharacterAnimation(int frameWidth, int frameHeight, Tengu tengu)
+    public AbstractCharacterAnimation(int frameWidth, int frameHeight, Tengu tengu)
     {
         this.frameWidth = frameWidth;
         this.frameHeight = frameHeight;
@@ -32,7 +31,6 @@ public abstract class CharacterAnimation
     public void create(String fileName, int frameCols, int frameRows, float animationDuration)
     {
         // Initialisation
-        this.spriteBatch = new SpriteBatch();
         this.texture = new Texture(Gdx.files.internal(fileName));
 
         //map sprites into one dimensional array
@@ -61,25 +59,9 @@ public abstract class CharacterAnimation
         this.actualFrame.setRegion(this.actualFrame, 0, 0, this.frameWidth, this.frameHeight);
     }
 
-    public void render()
+    public void render(SpriteBatch spriteBatch)
     {
-        this.spriteBatch.begin();
-        this.spriteBatch.draw(this.actualFrame, this.tengu.getPosition().x, this.tengu.getPosition().y, this.frameWidth / 2, this.frameHeight / 2, this.frameWidth, this.frameHeight, this.tengu.getScale(), 1, 0/*, actualFrame.getRegionX(), actualFrame.getRegionY(), actualFrame.getRegionWidth(), actualFrame.getRegionHeight(), false, false*/);
-        this.spriteBatch.end();
-    }
-
-    public void renderFrame(int frameIndex)
-    {
-        TextureRegion[] tmp = animation.getKeyFrames();
-        actualFrame = tmp[frameIndex];
-        actualFrame.setRegion(actualFrame, 0, 0, frameWidth, frameHeight);
-
-        int scale = (int) Math.signum(Math.atan2(this.tengu.getVelocity().x, this.tengu.getVelocity().y));
-        scale = scale == 0 ? 1 : scale;
-
-        spriteBatch.begin();
-        spriteBatch.draw(actualFrame, tengu.getPosition().x, tengu.getPosition().y, frameWidth / 2, frameHeight / 2, frameWidth, frameHeight, scale, 1, 0/*, actualFrame.getRegionX(), actualFrame.getRegionY(), actualFrame.getRegionWidth(), actualFrame.getRegionHeight(), false, false*/);
-        spriteBatch.end();
+        spriteBatch.draw(this.actualFrame, this.tengu.getPosition().x, this.tengu.getPosition().y, this.frameWidth / 2, this.frameHeight / 2, this.frameWidth, this.frameHeight, this.tengu.getScale(), 1, 0/*, actualFrame.getRegionX(), actualFrame.getRegionY(), actualFrame.getRegionWidth(), actualFrame.getRegionHeight(), false, false*/);
     }
 
     public void reset()
@@ -92,11 +74,6 @@ public abstract class CharacterAnimation
     public float getElapsedTime()
     {
         return elapsedTime;
-    }
-
-    public SpriteBatch getSpriteBatch()
-    {
-        return spriteBatch;
     }
 
     public float getWidth()

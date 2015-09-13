@@ -1,13 +1,12 @@
-package com.mygdx.character.animations;
+package com.mygdx.animations.character;
 
-import com.badlogic.gdx.ApplicationListener;
 import com.mygdx.character.Tengu;
 
-public class CharacterStanceAnimation extends CharacterAnimation
+public class CharacterStanceAnimation extends AbstractCharacterAnimation
 {
     public static final int FRAME_COLS = 6;
     public static final int FRAME_ROWS = 1;
-    public static final String SPRITE_FILENAME = "spritesheet_tengu_stance.png";
+    public static final String SPRITE_FILENAME = "sprites/tengu-animations/spritesheet_tengu_stance.png";
     public static final float ANIMATION_DURATION= 1f;
 
     public CharacterStanceAnimation(Tengu tengu)
@@ -24,11 +23,6 @@ public class CharacterStanceAnimation extends CharacterAnimation
     public void update()
     {
         super.update(true);
-    }
-
-    public void render()
-    {
-        super.render();
     }
 
     public void reset()

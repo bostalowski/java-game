@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
-public class Plateform
+public class Platform
 {
     private Vector2 position;
     private float width,
@@ -14,7 +14,7 @@ public class Plateform
 
     private ShapeRenderer shapeRenderer;
 
-    public Plateform(float x, float y, float width, float height)
+    public Platform(float x, float y, float width, float height)
     {
         this.position = new Vector2(x, y);
         this.width = width;

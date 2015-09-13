@@ -10,24 +10,25 @@ import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.controllers.PovDirection;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.mygdx.animations.effects.BaseEffectAnimation;
 import com.mygdx.character.Tengu;
-import com.mygdx.environment.Plateform;
+import com.mygdx.environment.Platform;
 import com.mygdx.tools.Gravity;
 import com.mygdx.tools.XBox360Pad;
-
-import java.util.ArrayList;
-
 
 public class MyGdxGame extends ApplicationAdapter implements ControllerListener, InputProcessor {
 
 	private Controller controller;
 	private OrthographicCamera camera;
+    private Tengu tengu;
     private Gravity gravity;
-	private Tengu tengu;
+    private SpriteBatch spriteBatch;
 
 	private Pool<Rectangle> rectanglePool = new Pool<Rectangle>() {
 		@Override
@@ -36,11 +37,16 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 		}
 	};
 
-	ArrayList<Plateform> plateformList;
+	Array<Platform> platformList;
+    Array<BaseEffectAnimation> backgroundEffects;
+    Array<BaseEffectAnimation> foregroundEffects;
 
 	@Override
 	public void create ()
 	{
+        // set resolution to default and set full-screen to true
+        //Gdx.graphics.setDisplayMode(Gdx.graphics.getDesktopDisplayMode().width, Gdx.graphics.getDesktopDisplayMode().height, true);
+
 		// Listen to all controllers, not just one
 		Controllers.addListener(this);
 		Gdx.input.setInputProcessor(this);
@@ -54,17 +60,20 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 		this.camera.position.set(0, 1080f / 2f, 0);
 		this.camera.update();
 
-		this.gravity = new Gravity();
-
 		this.tengu = new Tengu(new Vector2(0, 20), 0, 0);
+        this.gravity = new Gravity();
         this.gravity.addGravityAffectedElement(this.tengu);
 
-		this.plateformList = new ArrayList();
-		plateformList.add(new Plateform(0, -100, Gdx.graphics.getWidth() * 10, 110));
+        this.spriteBatch = new SpriteBatch();
+
+		this.platformList = new Array<>();
+        platformList.add(new Platform(0, -100, Gdx.graphics.getWidth() * 10, 110));
 		for(int i=0; i<50; i++) {
-			plateformList.add(new Plateform((i + 1)*800, (float)Math.round(Math.random() * (500 - 100)), (float)Math.round(Math.random() * (500 - 100)), (float)Math.round(Math.random() * ( 500 - 100 ))));
+            platformList.add(new Platform((i + 1)*800, (float)Math.round(Math.random() * (500 - 100)), (float)Math.round(Math.random() * (500 - 100)), (float)Math.round(Math.random() * ( 500 - 100 ))));
 		}
-		//plateformList.add(new Plateform(500, 100, 200, 200));
+
+        this.backgroundEffects = new Array<>();
+        this.foregroundEffects = new Array<>();
 	}
 
 	public void update(float deltaTime)
@@ -82,6 +91,20 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 
 		this.tengu.setOldPosition(this.tengu.getPosition()).setOldVelocity(this.tengu.getVelocity());
 
+        //remove background finished animations
+        for(int i=0; i<this.backgroundEffects.size; i++) {
+            if(this.backgroundEffects.get(i).isAnimationFinished(deltaTime)) {
+                this.backgroundEffects.removeIndex(i);
+            }
+        }
+
+        //remove foreground finished animations
+        for(int i=0; i<this.foregroundEffects.size; i++) {
+            if(this.foregroundEffects.get(i).isAnimationFinished(deltaTime)) {
+                this.foregroundEffects.removeIndex(i);
+            }
+        }
+
 		//add delta time to position ?
 		//System.out.println((oldTenguPosition.x - this.tengu.getPosition().x) * deltaTime * 10);
 	}
@@ -92,25 +115,35 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 		float deltaTime = Gdx.graphics.getDeltaTime() * 10;
 		update(deltaTime);
 
-		//System.out.println(this.tengu.getPosition().y);
-
 		GL20 gl20 = Gdx.graphics.getGL20();
 		gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		gl20.glClearColor(1, 1, 1, 1);
 
 		this.camera.position.set(this.tengu.getPosition().x, this.camera.position.y, 0);
 		this.camera.update();
-		this.tengu.getSpriteBatch().setProjectionMatrix(this.camera.combined);
+        this.spriteBatch.setProjectionMatrix(this.camera.combined);
 
-		//TODO set projection matrix on rectangle ?
-
-		//plateforms
-		for(int i=0; i<this.plateformList.size(); i++) {
-			plateformList.get(i).setProjectionMatrix(this.camera.combined);
-			plateformList.get(i).render();
+		//platforms
+		for(int i=0; i<this.platformList.size; i++) {
+            platformList.get(i).setProjectionMatrix(this.camera.combined);
+            platformList.get(i).render();
 		}
 
-		this.tengu.render();
+        this.spriteBatch.begin();
+
+        //display background effects
+        for(int i=0; i<this.backgroundEffects.size; i++) {
+            this.backgroundEffects.get(i).render(this.spriteBatch);
+        }
+
+		this.tengu.render(this.spriteBatch);
+
+        //display foreground effects
+        for(int i=0; i<this.foregroundEffects.size; i++) {
+            this.foregroundEffects.get(i).render(this.spriteBatch);
+        }
+
+        this.spriteBatch.end();
 	}
 
 	@Override
@@ -127,8 +160,8 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 		boolean resetX = false,
 				resetY = false;
 
-		for(Plateform plateform : this.plateformList) {
-			Rectangle plateformRectangle = plateform.getRectangle(this.rectanglePool.obtain());
+		for(Platform platform : this.platformList) {
+			Rectangle plateformRectangle = platform.getRectangle(this.rectanglePool.obtain());
 
 			if(
 				((tenguRectangle.getX() + tenguRectangle.getWidth() >= plateformRectangle.getX()) && (tenguRectangle.getX() <= plateformRectangle.getX() + plateformRectangle.getWidth()))
@@ -286,6 +319,7 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 		//JUMP
 		if(keycode == Input.Keys.SPACE) {
 			this.tengu.jump();
+            this.foregroundEffects.add(new BaseEffectAnimation("sprites/effects/spritesheet_tengu_dust_run.png", 5, 1, 0.5f, false).setPosition(this.tengu.getPosition()).setScale(this.tengu.getScale()));
 		}
 
 		//DASH LEFT

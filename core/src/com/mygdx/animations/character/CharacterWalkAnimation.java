@@ -1,12 +1,12 @@
-package com.mygdx.character.animations;
+package com.mygdx.animations.character;
 
 import com.mygdx.character.Tengu;
 
-public class CharacterWalkAnimation extends CharacterAnimation
+public class CharacterWalkAnimation extends AbstractCharacterAnimation
 {
     public static final int FRAME_COLS = 6;
     public static final int FRAME_ROWS = 1;
-    public static final String SPRITE_FILENAME = "spritesheet_tengu_walk.png";
+    public static final String SPRITE_FILENAME = "sprites/tengu-animations/spritesheet_tengu_walk.png";
     public static final float ANIMATION_DURATION = 0.5f;
 
     public CharacterWalkAnimation(Tengu tengu)

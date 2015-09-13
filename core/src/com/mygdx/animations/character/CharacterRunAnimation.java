@@ -1,14 +1,13 @@
-package com.mygdx.character.animations;
+package com.mygdx.animations.character;
 
-import com.badlogic.gdx.ApplicationListener;
 import com.mygdx.character.Tengu;
 
 
-public class CharacterRunAnimation extends CharacterAnimation
+public class CharacterRunAnimation extends AbstractCharacterAnimation
 {
     public static final int FRAME_COLS = 6;
     public static final int FRAME_ROWS = 1;
-    public static final String SPRITE_FILENAME = "spritesheet_tengu_run.png";
+    public static final String SPRITE_FILENAME = "sprites/tengu-animations/spritesheet_tengu_run.png";
     public static final float ANIMATION_DURATION = 0.5f;
 
     public CharacterRunAnimation(Tengu tengu)
@@ -26,11 +25,6 @@ public class CharacterRunAnimation extends CharacterAnimation
     {
         this.setAnimationDuration(Tengu.SPEED_RUN_MAX_VELOCITY - Math.round(Math.abs(this.tengu.getVelocity().x)) + ANIMATION_DURATION, FRAME_COLS, FRAME_ROWS);
         super.update(true);
-    }
-
-    public void render()
-    {
-        super.render();
     }
 
     public boolean isAnimationFinished() {

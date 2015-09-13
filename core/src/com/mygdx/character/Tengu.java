@@ -3,7 +3,7 @@ package com.mygdx.character;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.character.animations.*;
+import com.mygdx.animations.character.*;
 import com.mygdx.tools.Physics;
 
 public class Tengu extends Physics
@@ -32,14 +32,14 @@ public class Tengu extends Physics
     private float direction;
 
     private int currentAction;
-    private CharacterAnimation currentAnimation;
-    private CharacterAnimation characterStanceAnimation;
-    private CharacterAnimation characterRunAnimation;
-    private CharacterAnimation characterJumpAnimation;
-    private CharacterAnimation characterDoubleJumpAnimation;
-    private CharacterAnimation characterFallAnimation;
-    private CharacterAnimation characterSlideAnimation;
-    private CharacterAnimation characterWalkAnimation;
+    private AbstractCharacterAnimation currentAnimation;
+    private AbstractCharacterAnimation characterStanceAnimation;
+    private AbstractCharacterAnimation characterRunAnimation;
+    private AbstractCharacterAnimation characterJumpAnimation;
+    private AbstractCharacterAnimation characterDoubleJumpAnimation;
+    private AbstractCharacterAnimation characterFallAnimation;
+    private AbstractCharacterAnimation characterSlideAnimation;
+    private AbstractCharacterAnimation characterWalkAnimation;
 
     public boolean isOnGround,
             isJumping,
@@ -87,10 +87,6 @@ public class Tengu extends Physics
     public void update(float deltaTime)
     {
         if(this.isOnGround) {
-            //if just landed, no inertia
-            if(this.isJumping) {
-                //this.velocity = new Vector2(0, this.velocity.y);
-            }
             this.isJumping = false;
             this.hasDoubleJumped = false;
             this.friction = new Vector2(FRICTION_ON_GROUND, 0);
@@ -128,7 +124,7 @@ public class Tengu extends Physics
         this.velocity = new Vector2(Math.round(this.velocity.x * 100)/100f, Math.round(this.velocity.y * 100)/100f);
         this.position.add(this.velocity);
 
-        if(!this.isAnyKeyPressed && !this.isJumping) {
+        if(!this.isAnyKeyPressed && !this.isJumping && this.isOnGround) {
             if(Math.abs(this.velocity.x) > 2) {
                 changeAnimation(ACTION_SLIDE);
             }
@@ -143,17 +139,18 @@ public class Tengu extends Physics
         this.isAnyKeyPressed = false;
     }
 
-    public void render()
+    public void render(SpriteBatch spriteBatch)
     {
-        this.currentAnimation.render();
+        this.currentAnimation.render(spriteBatch);
     }
 
     public void jump()
     {
-        if(!this.isJumping && !this.hasDoubleJumped) {
+        if(this.isOnGround && !this.isJumping && !this.hasDoubleJumped) {
             this.isJumping = true;
             changeAnimation(ACTION_JUMP);
-        } else if(this.isJumping && !this.hasDoubleJumped) {
+        } else if((!this.isOnGround || this.isJumping) && !this.hasDoubleJumped) {
+            this.isJumping = true;
             this.hasDoubleJumped = true;
             changeAnimation(ACTION_DOUBLE_JUMP);
         } else {
@@ -300,7 +297,8 @@ public class Tengu extends Physics
 
     public float getHeight()
     {
-        return this.currentAnimation.getHeight();
+        //return this.currentAnimation.getHeight();
+        return 130;
     }
 
     public Tengu setIsOnGround(boolean isOnGround)
@@ -312,11 +310,6 @@ public class Tengu extends Physics
     public Rectangle getRectangle(Rectangle rectangle)
     {
         return rectangle.setX(this.position.x).setY(this.position.y).setWidth(this.getWidth()).setHeight(this.getHeight());
-    }
-
-    public SpriteBatch getSpriteBatch()
-    {
-        return this.currentAnimation.getSpriteBatch();
     }
 
     public Vector2 getOldPosition()
