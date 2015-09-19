@@ -76,7 +76,10 @@ public abstract class AbstractCharacterAnimation
         this.previousKeyFrameIndex = -1;
     }
 
-    public abstract boolean isAnimationFinished();
+    public boolean isAnimationFinished()
+    {
+        return this.animation.isAnimationFinished(this.elapsedTime);
+    }
 
     public float getElapsedTime()
     {

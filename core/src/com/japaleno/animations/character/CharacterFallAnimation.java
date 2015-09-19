@@ -19,9 +19,4 @@ public class CharacterFallAnimation extends AbstractCharacterAnimation
     {
         super.create(SPRITE_FILENAME, FRAME_COLS, FRAME_ROWS, ANIMATION_DURATION, true);
     }
-
-    public boolean isAnimationFinished()
-    {
-        return false;
-    }
 }

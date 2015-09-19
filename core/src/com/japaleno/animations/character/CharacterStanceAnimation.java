@@ -19,13 +19,4 @@ public class CharacterStanceAnimation extends AbstractCharacterAnimation
     {
         super.create(SPRITE_FILENAME, FRAME_COLS, FRAME_ROWS, ANIMATION_DURATION, true);
     }
-
-    public void reset()
-    {
-        elapsedTime = 0;
-    }
-
-    public boolean isAnimationFinished() {
-        return false;
-    }
 }

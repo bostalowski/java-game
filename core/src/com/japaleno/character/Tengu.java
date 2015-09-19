@@ -16,6 +16,7 @@ public class Tengu extends Physics
     private static final int ACTION_FALL = 4;
     private static final int ACTION_SLIDE = 5;
     private static final int ACTION_WALK = 6;
+    private static final int ACTION_LANDING = 7;
 
     public static final float SPEED_RUN_MAX_VELOCITY = 10f;
     public static final float SPEED_RUN_ACCELERATION = 2f;
@@ -41,12 +42,14 @@ public class Tengu extends Physics
     private AbstractCharacterAnimation characterFallAnimation;
     private AbstractCharacterAnimation characterSlideAnimation;
     private AbstractCharacterAnimation characterWalkAnimation;
+    private AbstractCharacterAnimation characterLandingAnimation;
 
     public boolean isOnGround,
             isJumping,
             hasDoubleJumped,
             isDashingLeft,
             isDashingRight,
+            isLanding,
             isAnyKeyPressed;
 
     public static final float DASH_MAX_DISTANCE = 300f;
@@ -70,6 +73,7 @@ public class Tengu extends Physics
         this.hasDoubleJumped = false;
         this.isDashingLeft = false;
         this.isDashingRight = false;
+        this.isLanding = false;
         this.elapsedDashDistance = 0;
         this.isAnyKeyPressed = false;
 
@@ -80,17 +84,26 @@ public class Tengu extends Physics
         this.characterFallAnimation = new CharacterFallAnimation(this);
         this.characterSlideAnimation = new CharacterSlideAnimation(this);
         this.characterWalkAnimation = new CharacterWalkAnimation(this);
+        this.characterLandingAnimation = new CharacterLandingAnimation(this);
 
         this.currentAction = ACTION_STANCE;
         this.currentAnimation = this.characterStanceAnimation;
     }
 
-    public void update(float deltaTime)
+    public void update()
     {
         if(this.isOnGround) {
             this.isJumping = false;
             this.hasDoubleJumped = false;
             this.friction = new Vector2(FRICTION_ON_GROUND, 0);
+
+            if(this.isLanding && this.currentAction != ACTION_LANDING) {
+                changeAnimation(ACTION_LANDING);
+            }
+
+            if(this.currentAction == ACTION_LANDING && this.currentAnimation.isAnimationFinished()) {
+                this.isLanding = false;
+            }
         } else {
             this.friction = new Vector2(FRICTION_ON_AIR, 0);
             //is falling ?
@@ -125,7 +138,7 @@ public class Tengu extends Physics
         this.velocity = new Vector2(Math.round(this.velocity.x * 100)/100f, Math.round(this.velocity.y * 100)/100f);
         this.position.add(this.velocity);
 
-        if(!this.isAnyKeyPressed && !this.isJumping && this.isOnGround) {
+        if(!this.isAnyKeyPressed && !this.isJumping && this.isOnGround && !this.isLanding) {
             if(Math.abs(this.velocity.x) > 2) {
                 changeAnimation(ACTION_SLIDE);
             }
@@ -196,7 +209,7 @@ public class Tengu extends Physics
 
         this.isAnyKeyPressed = true;
         this.direction = DIRECTION_LEFT;
-        if(!this.isJumping) {
+        if(!this.isJumping && !this.isLanding) {
             changeAnimation(action);
         }
     }
@@ -226,7 +239,7 @@ public class Tengu extends Physics
 
         this.isAnyKeyPressed = true;
         this.direction = DIRECTION_RIGHT;
-        if(!isJumping) {
+        if(!this.isJumping && !this.isLanding) {
             this.changeAnimation(action);
         }
     }
@@ -281,6 +294,9 @@ public class Tengu extends Physics
                 case ACTION_WALK:
                     this.currentAnimation = this.characterWalkAnimation;
                     break;
+                case ACTION_LANDING:
+                    this.currentAnimation = this.characterLandingAnimation;
+                    break;
                 default:
                     this.currentAnimation = this.characterStanceAnimation;
             }
@@ -312,6 +328,11 @@ public class Tengu extends Physics
     public Tengu setIsOnGround(boolean isOnGround)
     {
         this.isOnGround = isOnGround;
+
+        if(isOnGround && (this.isJumping || this.currentAction == ACTION_FALL)) {
+            this.isLanding = true;
+        }
+
         return this;
     }
 

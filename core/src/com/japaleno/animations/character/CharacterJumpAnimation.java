@@ -19,9 +19,4 @@ public class CharacterJumpAnimation extends AbstractCharacterAnimation
     {
         super.create(SPRITE_FILENAME, FRAME_COLS, FRAME_ROWS, ANIMATION_DURATION, false);
     }
-
-    public boolean isAnimationFinished()
-    {
-        return animation.isAnimationFinished(elapsedTime);
-    }
 }
