@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.japaleno.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -16,13 +16,13 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import com.mygdx.animations.effects.BaseEffectAnimation;
-import com.mygdx.character.Tengu;
-import com.mygdx.environment.Platform;
-import com.mygdx.tools.Gravity;
-import com.mygdx.tools.XBox360Pad;
+import com.japaleno.character.Tengu;
+import com.japaleno.environment.Platform;
+import com.japaleno.tools.EffectHandler;
+import com.japaleno.tools.Gravity;
+import com.japaleno.tools.XBox360Pad;
 
-public class MyGdxGame extends ApplicationAdapter implements ControllerListener, InputProcessor {
+public class JapalenoGame extends ApplicationAdapter implements ControllerListener, InputProcessor {
 
 	private Controller controller;
 	private OrthographicCamera camera;
@@ -37,9 +37,7 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 		}
 	};
 
-	Array platformList;
-    Array backgroundEffects;
-    Array foregroundEffects;
+	private Array platformList;
 
 	@Override
 	public void create ()
@@ -67,13 +65,10 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
         this.spriteBatch = new SpriteBatch();
 
 		this.platformList = new Array();
-        this.platformList.add(new Platform(0, -100, Gdx.graphics.getWidth() * 10, 110));
+        this.platformList.add(new Platform(0, -100, Gdx.graphics.getWidth() * 100, 110));
 		for(int i=0; i<50; i++) {
             this.platformList.add(new Platform((i + 1)*800, (float)Math.round(Math.random() * (500 - 100)), (float)Math.round(Math.random() * (500 - 100)), (float)Math.round(Math.random() * ( 500 - 100 ))));
 		}
-
-        this.backgroundEffects = new Array();
-        this.foregroundEffects = new Array();
 	}
 
 	public void update(float deltaTime)
@@ -91,21 +86,9 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 
 		this.tengu.setOldPosition(this.tengu.getPosition()).setOldVelocity(this.tengu.getVelocity());
 
-        //remove background finished animations
-        for(int i=0; i<this.backgroundEffects.size; i++) {
-            BaseEffectAnimation baseEffectAnimation = (BaseEffectAnimation) this.backgroundEffects.get(i);
-            if(baseEffectAnimation.isAnimationFinished(deltaTime)) {
-                this.backgroundEffects.removeIndex(i);
-            }
-        }
+        //remove finished animations
+		EffectHandler.RemoveFinishedEffects(deltaTime);
 
-        //remove foreground finished animations
-        for(int i=0; i<this.foregroundEffects.size; i++) {
-            BaseEffectAnimation baseEffectAnimation = (BaseEffectAnimation) this.foregroundEffects.get(i);
-            if(baseEffectAnimation.isAnimationFinished(deltaTime)) {
-                this.foregroundEffects.removeIndex(i);
-            }
-        }
 
 		//add delta time to position ?
 		//System.out.println((oldTenguPosition.x - this.tengu.getPosition().x) * deltaTime * 10);
@@ -135,18 +118,12 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
         this.spriteBatch.begin();
 
         //display background effects
-        for(int i=0; i<this.backgroundEffects.size; i++) {
-            BaseEffectAnimation baseEffectAnimation = (BaseEffectAnimation) this.backgroundEffects.get(i);
-            baseEffectAnimation.render(this.spriteBatch);
-        }
+		EffectHandler.RenderBackgroundEffects(this.spriteBatch);
 
 		this.tengu.render(this.spriteBatch);
 
         //display foreground effects
-        for(int i=0; i<this.foregroundEffects.size; i++) {
-            BaseEffectAnimation baseEffectAnimation = (BaseEffectAnimation) this.foregroundEffects.get(i);
-            baseEffectAnimation.render(this.spriteBatch);
-        }
+		EffectHandler.RenderForegroundEffects(this.spriteBatch);
 
         this.spriteBatch.end();
 	}
@@ -325,7 +302,6 @@ public class MyGdxGame extends ApplicationAdapter implements ControllerListener,
 		//JUMP
 		if(keycode == Input.Keys.SPACE) {
 			this.tengu.jump();
-            this.foregroundEffects.add(new BaseEffectAnimation("sprites/effects/spritesheet_tengu_dust_run.png", 5, 1, 0.5f, false).setPosition(this.tengu.getPosition()).setScale(this.tengu.getScale()));
 		}
 
 		//DASH LEFT

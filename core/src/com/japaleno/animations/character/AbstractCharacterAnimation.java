@@ -1,11 +1,11 @@
-package com.mygdx.animations.character;
+package com.japaleno.animations.character;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.mygdx.character.Tengu;
+import com.japaleno.character.Tengu;
 
 public abstract class AbstractCharacterAnimation
 {
@@ -21,14 +21,17 @@ public abstract class AbstractCharacterAnimation
 
     protected Tengu tengu;
 
+    protected int previousKeyFrameIndex;
+
     public AbstractCharacterAnimation(int frameWidth, int frameHeight, Tengu tengu)
     {
         this.frameWidth = frameWidth;
         this.frameHeight = frameHeight;
         this.tengu = tengu;
+        this.previousKeyFrameIndex = -1;
     }
 
-    public void create(String fileName, int frameCols, int frameRows, float animationDuration)
+    public void create(String fileName, int frameCols, int frameRows, float animationDuration, boolean loop)
     {
         // Initialisation
         this.texture = new Texture(Gdx.files.internal(fileName));
@@ -46,16 +49,19 @@ public abstract class AbstractCharacterAnimation
 
         //set animation speed
         this.animation = new Animation(animationDuration/(frameCols * frameRows), this.frames);
+        if(loop) {
+            this.animation.setPlayMode(Animation.PlayMode.LOOP);
+        }
         this.elapsedTime = 0.0f;
     }
 
-    public abstract void update();
-
-    public void update(boolean loop)
+    public void update()
     {
+        this.previousKeyFrameIndex = this.animation.getKeyFrameIndex(this.elapsedTime);
+
         this.elapsedTime += Gdx.graphics.getDeltaTime();
 
-        this.actualFrame = this.animation.getKeyFrame(this.elapsedTime, loop);
+        this.actualFrame = this.animation.getKeyFrame(this.elapsedTime);
         this.actualFrame.setRegion(this.actualFrame, 0, 0, this.frameWidth, this.frameHeight);
     }
 
@@ -67,28 +73,34 @@ public abstract class AbstractCharacterAnimation
     public void reset()
     {
         this.elapsedTime = 0;
+        this.previousKeyFrameIndex = -1;
     }
 
     public abstract boolean isAnimationFinished();
 
     public float getElapsedTime()
     {
-        return elapsedTime;
+        return this.elapsedTime;
     }
 
     public float getWidth()
     {
-        return frameWidth;
+        return this.frameWidth;
     }
 
     public float getHeight()
     {
-        return frameHeight;
+        return this.frameHeight;
     }
 
-    public boolean isLastFrame()
+    public int getKeyFrameIndex()
     {
-        return animation.getKeyFrameIndex(elapsedTime) == frames.length - 1;
+        return this.animation.getKeyFrameIndex(this.elapsedTime);
+    }
+
+    public int getPreviousKeyFrameIndex()
+    {
+        return this.previousKeyFrameIndex;
     }
 
     public void setAnimationDuration(float animationDuration, int frameCols, int frameRows)

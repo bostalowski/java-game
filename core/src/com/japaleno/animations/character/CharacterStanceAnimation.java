@@ -1,6 +1,6 @@
-package com.mygdx.animations.character;
+package com.japaleno.animations.character;
 
-import com.mygdx.character.Tengu;
+import com.japaleno.character.Tengu;
 
 public class CharacterStanceAnimation extends AbstractCharacterAnimation
 {
@@ -17,12 +17,7 @@ public class CharacterStanceAnimation extends AbstractCharacterAnimation
 
     public void create()
     {
-        super.create(SPRITE_FILENAME, FRAME_COLS, FRAME_ROWS, ANIMATION_DURATION);
-    }
-
-    public void update()
-    {
-        super.update(true);
+        super.create(SPRITE_FILENAME, FRAME_COLS, FRAME_ROWS, ANIMATION_DURATION, true);
     }
 
     public void reset()

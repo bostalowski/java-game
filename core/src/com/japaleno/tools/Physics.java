@@ -1,6 +1,5 @@
-package com.mygdx.tools;
+package com.japaleno.tools;
 
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 public class Physics

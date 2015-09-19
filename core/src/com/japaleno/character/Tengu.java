@@ -1,10 +1,11 @@
-package com.mygdx.character;
+package com.japaleno.character;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.animations.character.*;
-import com.mygdx.tools.Physics;
+import com.japaleno.animations.character.*;
+import com.japaleno.tools.EffectHandler;
+import com.japaleno.tools.Physics;
 
 public class Tengu extends Physics
 {
@@ -137,6 +138,10 @@ public class Tengu extends Physics
 
         this.currentAnimation.update();
         this.isAnyKeyPressed = false;
+
+        if(this.currentAction == ACTION_RUN && this.currentAnimation.getKeyFrameIndex() == 3 && this.currentAnimation.getPreviousKeyFrameIndex() != this.currentAnimation.getKeyFrameIndex()) {
+            EffectHandler.AddRunEffect(this.getScale(), new Vector2(this.getScale() < 0 ? this.position.x + this.getWidth() : this.position.x, this.position.y));
+        }
     }
 
     public void render(SpriteBatch spriteBatch)
@@ -161,6 +166,9 @@ public class Tengu extends Physics
         this.isOnGround = false;
         Vector2 force = new Vector2(0, SPEED_JUMP_ACCELERATION - this.velocity.y);
         this.applyForce(force);
+
+        //add smoke jump effect
+        EffectHandler.AddJumpEffect(this.getScale(), new Vector2(this.getScale() < 0 ? this.position.x + this.getWidth() : this.position.x, this.position.y));
     }
 
     public void moveLeft()

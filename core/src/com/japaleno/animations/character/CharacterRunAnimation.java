@@ -1,6 +1,6 @@
-package com.mygdx.animations.character;
+package com.japaleno.animations.character;
 
-import com.mygdx.character.Tengu;
+import com.japaleno.character.Tengu;
 
 
 public class CharacterRunAnimation extends AbstractCharacterAnimation
@@ -18,13 +18,7 @@ public class CharacterRunAnimation extends AbstractCharacterAnimation
 
     public void create()
     {
-        super.create(SPRITE_FILENAME, FRAME_COLS, FRAME_ROWS, ANIMATION_DURATION);
-    }
-
-    public void update()
-    {
-        this.setAnimationDuration(Tengu.SPEED_RUN_MAX_VELOCITY - Math.round(Math.abs(this.tengu.getVelocity().x)) + ANIMATION_DURATION, FRAME_COLS, FRAME_ROWS);
-        super.update(true);
+        super.create(SPRITE_FILENAME, FRAME_COLS, FRAME_ROWS, ANIMATION_DURATION, true);
     }
 
     public boolean isAnimationFinished() {

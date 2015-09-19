@@ -1,6 +1,6 @@
-package com.mygdx.animations.character;
+package com.japaleno.animations.character;
 
-import com.mygdx.character.Tengu;
+import com.japaleno.character.Tengu;
 
 public class CharacterWalkAnimation extends AbstractCharacterAnimation
 {
@@ -17,13 +17,7 @@ public class CharacterWalkAnimation extends AbstractCharacterAnimation
 
     public void create()
     {
-        super.create(SPRITE_FILENAME, FRAME_COLS, FRAME_ROWS, ANIMATION_DURATION);
-    }
-
-    @Override
-    public void update()
-    {
-        this.update(false);
+        super.create(SPRITE_FILENAME, FRAME_COLS, FRAME_ROWS, ANIMATION_DURATION, false);
     }
 
     @Override

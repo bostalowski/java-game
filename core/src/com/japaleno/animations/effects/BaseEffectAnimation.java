@@ -1,4 +1,4 @@
-package com.mygdx.animations.effects;
+package com.japaleno.animations.effects;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
