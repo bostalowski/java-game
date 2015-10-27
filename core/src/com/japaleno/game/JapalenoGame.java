@@ -53,7 +53,6 @@ public class JapalenoGame extends ApplicationAdapter implements ControllerListen
         }
 
         this.camera = new OrthographicCamera(1920, 1080);
-        this.camera.setToOrtho(false, 1920, 1080);
         this.camera.position.set(0, 1080f / 2f, 0);
         this.camera.update();
 
@@ -102,7 +101,11 @@ public class JapalenoGame extends ApplicationAdapter implements ControllerListen
         gl20.glClear(GL20.GL_COLOR_BUFFER_BIT);
         gl20.glClearColor(1, 1, 1, 1);
 
-        this.camera.position.set(this.tengu.getPosition().x, this.camera.position.y, 0);
+        if(this.tengu.getScale() > 0) {
+            this.camera.position.set(this.tengu.getPosition().x, this.camera.position.y, 0);
+        } else {
+            this.camera.position.set(this.tengu.getPosition().x, this.camera.position.y, 0);
+        }
         this.camera.update();
         this.spriteBatch.setProjectionMatrix(this.camera.combined);
 

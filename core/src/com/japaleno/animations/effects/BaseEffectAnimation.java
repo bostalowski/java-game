@@ -83,4 +83,19 @@ public class BaseEffectAnimation
         this.scale = scale;
         return this;
     }
+
+    public float getScale()
+    {
+        return this.scale;
+    }
+
+    public float getFrameWidth()
+    {
+        return this.frameWidth;
+    }
+
+    public float getFrameHeight()
+    {
+        return this.frameHeight;
+    }
 }

@@ -54,7 +54,8 @@ public class EffectHandler
 
     public static void AddJumpEffect(float direction, Vector2 position)
     {
-        BaseEffectAnimation baseEffectAnimation = new BaseEffectAnimation("sprites/effects/spritesheet_tengu_dust_run.png", 5, 1, 0.5f, false).setScale(direction).setPosition(position);
+        BaseEffectAnimation baseEffectAnimation = new BaseEffectAnimation("sprites/effects/spritesheet_tengu_dust_run.png", 5, 1, 0.5f, false).setScale(direction);
+        baseEffectAnimation.setPosition(new Vector2(baseEffectAnimation.getScale() < 0 ? position.x - baseEffectAnimation.getFrameWidth() : position.x, position.y));
         ForegroundEffects.add(baseEffectAnimation);
     }
 

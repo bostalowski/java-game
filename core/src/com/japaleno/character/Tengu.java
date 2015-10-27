@@ -315,7 +315,6 @@ public class Tengu extends Physics
 
     public float getWidth()
     {
-        //return this.currentAnimation.getWidth();
         return 130;
     }
 
